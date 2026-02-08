@@ -4,7 +4,7 @@ I used to whiteboard, then code. Now I markdown, then code.
 
 There are many ways to vibe code, but this one will allow you to understand the code that is being built, come back to it 6 months later and actually understand it, and more importantly, craft user-facing documentation artifacts trivially. The canonical documentation and plan files are actually kind of awesome for giving LLMs immediate, complete, and effective context to keep them guardrailed, without too much wrangling.
 
-**In short:** A structured methodology for creating high-quality technical documentation and implementation plans using Claude Code's AI assistance.
+**In short:** A structured methodology for creating high-quality technical documentation and implementation plans using Claude Code's (or any LLM for that matter) AI assistance.
 
 ## What Is This?
 
@@ -26,6 +26,23 @@ Each stage has explicit guidelines, checkpoints, and quality gates. The methodol
 This workflow was yanked directly from a production project (a computer vision training pipeline). The documents contain references to that project's specific domain (maritime vessel tracking, Label Studio, YOLO models, etc.).
 
 **These are features, not bugs.** Real examples are more useful than sanitized generic templates. Adapt the prefixes, terminology, and examples to your own project.
+
+## Git Verified Results
+
+This methodology was used in production across 3+ projects over 4 months before being extracted into this repository. The results were independently analyzed against git history, GitHub API data, and 32 conversation session logs. The full analysis is available in the case study.
+
+| Metric | Value |
+|--------|-------|
+| In production use since | October 2025 |
+| Projects using methodology | 3+ (maritime tracking, CV pipeline, database systems) |
+| Best plan-to-execution ratio | 7:1 (18 hours planning, 2.5 hours executing) |
+| Fastest phase execution | 43 minutes across Phases 0-V (nautical charts feature) |
+| Free documentation artifacts per feature | 10 (quickstart, deployment, developer guide, troubleshooting, security audit, user guide, testing, smoke tests, sign-off, release notes) |
+| Combined methodology output (one project) | 67,050 lines across 62 docs + 23 plans |
+
+The methodology's own standards demand verifiable claims. This case study applies that principle to the methodology itself.
+
+[**Full Case Study: Verified Results and Analysis**](documentation/general_methodology_case_study_documentation.md)
 
 ## Quick Start
 

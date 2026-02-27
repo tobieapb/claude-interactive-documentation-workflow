@@ -207,6 +207,43 @@ The guidelines files are enforcement documents. Point any LLM at them with:
 
 The `/interview` skill is a Claude Code convenience, not a requirement. The real value is in the guidelines themselves.
 
+## Session Rules and Machine Configuration
+
+Beyond the documentation workflow, this repo also serves as the canonical source for **Claude Code session governance** — rules that control how Claude behaves across sessions, machines, and projects.
+
+### The Problem
+
+Claude Code stores configuration at multiple levels: project-level (git-tracked), user-level (machine-local), and auto memory (machine-local + path-specific). Without governance, machine-local state drifts silently, rules written on one machine vanish on another, and Claude may write to local storage without the user's awareness.
+
+### The Solution
+
+A layered rules system with a bootstrapping mechanism:
+
+| Layer | Location | Git-Tracked | Purpose |
+|-------|----------|-------------|---------|
+| Subdirectory rules | `<subdir>/.claude/CLAUDE.md` | Yes | Scoped to one module or subproject |
+| Project rules | `.claude/CLAUDE.md` | Yes | Scoped to one repository |
+| User-level rules | `~/.claude/CLAUDE.md` | No (deployed from template) | Universal personal preferences |
+| Auto memory | `~/.claude/projects/*/memory/` | No (forbidden by default) | Not used without explicit approval |
+
+Each project's `.claude/CLAUDE.md` includes a **bootstrap block** — a minimal set of inline rules that enforce correct behavior even on a fresh machine where user-level rules have not been deployed. The bootstrap references this repo for the full methodology.
+
+### Documents
+
+| Document | Purpose |
+|----------|---------|
+| [`general_claude_session_rules_documentation.md`](documentation/general_claude_session_rules_documentation.md) | Full specification: hierarchy, auto memory policy, bootstrapping, audit procedure, conflict resolution |
+| [`general_user_level_rules_template.md`](documentation/general_user_level_rules_template.md) | Deployable template for `~/.claude/CLAUDE.md` — copy to each machine |
+
+### Quick Setup (New Machine)
+
+```bash
+# Copy the user-level rules template to the Claude Code config directory
+cp documentation/general_user_level_rules_template.md ~/.claude/CLAUDE.md
+```
+
+After this, all projects on the machine inherit the full user-level rules. Each project's bootstrap block provides protection even before this step is done.
+
 ## License
 
 MIT License - See [LICENSE](LICENSE)
@@ -219,4 +256,4 @@ Found an improvement? PRs welcome. The bar is high—these documents enforce the
 
 ---
 
-**Last Updated:** 2026-02-01
+**Last Updated:** 2026-02-27

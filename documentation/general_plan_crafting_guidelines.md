@@ -64,7 +64,8 @@ When creating a plan:
 1. **Pass 1 (Skeleton):** Create structure, then STOP and present to user for review
 2. **Pass 2 (Atomicity):** Refine actions, then STOP and present to user for review
 3. **Pass 3 (Detail Enrichment):** Add context/code, then STOP and present to user for review
-4. **Pass 4 (Verification):** Add verification commands, then STOP and present final plan
+4. **Pass 4 (Verification):** Add verification commands, then STOP and present to user for review
+5. **Pass 5 (Initiation Prompt):** Write the executor prompt, then STOP and present for user approval
 
 **Write the plan to the file after each pass.** The file is the source of truth, not your context window.
 
@@ -239,9 +240,9 @@ A plan cannot achieve "zero ambiguity" (Section 1.3) if the underlying requireme
 
 ---
 
-## 2. The 4-Pass Methodology
+## 2. The 5-Pass Methodology
 
-Compliant plans **must** be created using this iterative, four-pass methodology. Each pass builds upon the last to progressively refine the plan from a high-level skeleton to a verifiable, zero-ambiguity blueprint.
+Compliant plans **must** be created using this iterative, five-pass methodology. Each pass builds upon the last to progressively refine the plan from a high-level skeleton to a verifiable, zero-ambiguity blueprint with a ready-to-use initiation prompt.
 
 | Pass | Name | Input | Output | Key Question |
 |------|------|-------|--------|--------------|
@@ -249,6 +250,7 @@ Compliant plans **must** be created using this iterative, four-pass methodology.
 | **2** | Atomicity | Skeleton Plan | Atomic Actions | "Can this be executed in 5 seconds without thinking?" |
 | **3** | Detail Enrichment | Atomic Plan | Enriched Actions with Context | "Is there any ambiguity left?" |
 | **4** | Verification | Enriched Plan | Verifiable Actions | "How do we prove each action is done?" |
+| **5** | Initiation Prompt | Verified Plan | Copy-pasteable executor prompt | "Can a clean session implement this with no other context?" |
 
 ### 2.1. Pass 1: Skeleton
 
@@ -549,6 +551,44 @@ The atomic checklist items from Pass 2 guide what goes inside each stub.
 - [ ] Each phase has verification checklist
 - [ ] All verification commands are copy-paste executable
 
+### 2.5. Pass 5: Initiation Prompt
+
+**Purpose:** Produce a copy-pasteable prompt the user can drop into a clean session to begin implementation. The prompt is the bridge between "the plan is approved" and "the plan is being executed."
+
+**Process:**
+1. Write a prompt that points the executor at the plan file and its required reading
+2. Include any environment presumptions (e.g., database accessible, toolchain installed)
+3. Instruct the executor to read the plan first and follow it phase by phase
+
+**Constraints:**
+- The prompt must not carry plan-specific information that only exists in the prompt
+- The prompt must not contain information that contradicts the plan or source documentation
+- If the prompt needs content not already in the plan, the plan is incomplete — go back and fix the plan first
+
+**When presenting the prompt for user approval, include the note:**
+
+> *This is a convenience — pointing the agent to the self-contained plan should be sufficient for full implementation. This prompt is provided for quality-of-life purposes.*
+
+**Example:**
+```
+Implement the plan at plans/molid_central_api_endpoints_plan.md
+
+Read the plan file and its Required Reading section first. Follow the
+phases in order. Stop at phase boundaries for verification. The plan
+contains boilerplate stubs, implementation hints, and verification
+commands for every action.
+
+Presumptions: Go 1.22+ installed, PostgreSQL 16+ accessible with
+mrnxstation schema deployed, swag tool installed.
+```
+
+**Pass 5 Completion Criteria:**
+- [ ] Prompt is 10 lines or fewer
+- [ ] Prompt contains only file paths, reading instructions, and environment presumptions
+- [ ] No plan-specific content exists only in the prompt
+- [ ] No contradiction with plan or source documentation
+- [ ] User has approved the prompt
+
 ---
 
 ## 3. Cross-Pass Consistency Rules
@@ -615,6 +655,19 @@ The atomic checklist items from Pass 2 guide what goes inside each stub.
 **Estimated Atomic Actions:** [exact count]
 **Last Updated:** [ISO 8601 timestamp]
 
+## Path Convention
+All paths in the plan must be written relative to the repository root, treating `.` as the repository root.
+
+Examples:
+- `./documentation/feature_specification.md`
+- `./plans/example_implementation_plan.md`
+- `./central-server/api/main.go`
+
+Rules:
+- Do not use filesystem-absolute paths such as `/home/user/project/...`
+- Do not use paths relative to a subdirectory unless that subdirectory is explicitly the repository root
+- Every path must be unambiguous when resolved from `.` at the repository root
+
 ## Required Reading
 - Primary: [path to source documentation]
 - Related: [paths to canonical files]
@@ -623,7 +676,7 @@ The atomic checklist items from Pass 2 guide what goes inside each stub.
 [See Section 5]
 
 ## Compliance Checklist
-- [ ] All file paths are absolute from project root
+- [ ] All file paths are repository-root-relative, with `.` defined as the repository root
 - [ ] All code snippets are syntactically valid
 - [ ] All SQL is parameterized with exact types
 - [ ] Every objective has 5+ atomic actions
@@ -741,6 +794,7 @@ Every plan should include a "Plan Development Status" section:
 | Pass 2: Atomicity | Single-verb, single-location actions | Complete |
 | Pass 3: Detail Enrichment | Code blocks, rationales, prerequisites | In Progress |
 | Pass 4: Verification | Verification commands | Pending |
+| Pass 5: Initiation Prompt | Copy-pasteable executor prompt | Pending |
 
 ### Current State
 - **Current Pass:** Pass 3 (Detail Enrichment)
@@ -767,6 +821,12 @@ Every plan should include a "Plan Development Status" section:
 **Pass 4 (Verification):**
 - [ ] 50%+ actions have verification
 - [ ] Phase checklists complete
+
+**Pass 5 (Initiation Prompt):**
+- [ ] Prompt is 10 lines or fewer
+- [ ] No plan-specific content only in prompt
+- [ ] No contradiction with plan or documentation
+- [ ] User approved
 ```
 
 **Why Track This:**
@@ -1064,7 +1124,7 @@ Before delivering any plan, verify **ALL** of these conditions:
 - [ ] Every section follows exact format from Section 4
 - [ ] All headings are numbered hierarchically
 - [ ] All code blocks have language tags and file path comments
-- [ ] All file paths are absolute from project root
+- [ ] All file paths are repository-root-relative, with `.` defined as the repository root
 - [ ] Plan includes all 9 mandatory phases
 - [ ] Each phase has at least one objective
 - [ ] Each objective has at least 5 atomic actions
@@ -1357,21 +1417,112 @@ You will generate the plan by following the prescribed **4-Pass Methodology**, d
 
 ### Pass 4: Verification
 
-**Your Goal:** Make the plan self-verifying.
+**Your Goal:** Make the plan self-verifying where failure is most costly, subtle, or hard to detect later.
 
 **Your Instructions:**
-1. For at least 50% of the actions, add a `Verification` field containing a copy-paste executable command and the expected output.
-2. At the end of each Phase, add a `Phase Verification Checklist` with commands to verify the state of the phase as a whole.
-3. Update the `Plan Development Status` section, marking all passes complete.
+1. Add a `Verification` field to high-impact, non-trivial, or failure-prone actions.
+2. Prioritize verification for:
+   - schema and state assumptions
+   - API contract registration and routing
+   - authentication and authorization wiring
+   - validation and error mapping
+   - persistence, transactions, and side effects
+   - cross-system or external integrations
+   - deployment, rollback, and operational checks
+   - end-to-end behavioral flows
+3. Do not add verification mechanically to trivial actions when the value is negligible.
+4. At the end of each Phase, add a `Phase Verification Checklist` with commands that verify the phase as a whole.
+5. Every verification command must be copy-paste executable from repository root and include the expected output or outcome.
 
-After completing all four passes, present the final, fully-compliant plan.
+**Completion Criteria:**
+- Every critical path in the plan has explicit verification coverage.
+- All high-impact actions have `Verification` fields.
+- Every phase has a `Phase Verification Checklist`.
+- Phase verification commands fail visibly on mismatch.
+- No major failure mode relies only on implicit verification.
+
+**Coverage Guidance:** Raw percentage is a secondary heuristic, not the primary standard. Prefer strong verification of risky or irreversible work over broad verification of trivial actions.
+
+As a rule of thumb, plans will often verify roughly one-third to one-half of actions, but a lower percentage is acceptable if all critical paths and high-risk actions are explicitly covered.
+
+**Final Pass 4 Self-Check:** Before marking Pass 4 complete, ask:
+- “Have I added explicit verification to the actions where failure would be subtle, expensive, or hard to detect later, or did I mostly verify easy structural items?”
+- “Which 5 actions in this plan are most likely to fail in a costly or non-obvious way, and does each of them have explicit verification?”
+
+If the answer is “mostly easy structural items,” or if any of those 5 highest-risk actions lack explicit verification, Pass 4 is not complete.
+
+6. Update the `Plan Development Status` section, marking all passes complete.
+
+**STOP and await confirmation before proceeding to Pass 5.**
+
+---
+
+### Pass 5: Initiation Prompt
+
+**Your Goal:** Produce a copy-pasteable prompt the user can hand to a clean agent session to begin implementation.
+
+**Your Instructions:**
+1. Write a prompt (10 lines or fewer) that points the executor at the plan file and its Required Reading.
+2. Include environment presumptions from the plan (toolchain, database, etc.).
+3. Instruct the executor to read the plan first and follow phases in order.
+4. Verify: the prompt contains NO plan-specific information that exists only in the prompt. If it does, the plan is incomplete — fix the plan first.
+5. Present the prompt to the user in this format:
+
+---
+
+**Pass 5 complete. Here is the initiation prompt for this plan:**
+
+*This is a convenience — pointing the agent to the self-contained plan should be sufficient for full implementation. This prompt is provided for quality-of-life purposes.*
+
+````text
+[The prompt here, fenced with ```text to visually distinguish it from code blocks]
+````
+
+**Options:**
+1. **Approve and embed** — This prompt will be added to the top of the plan file (below the header, above Required Reading) in a horizontal-rule-fenced section so any agent reading the plan sees it without being prompted.
+2. **Approve without embedding** — The prompt stays in the conversation for you to copy-paste into a clean session when ready. Nothing is added to the plan file.
+3. **Edit the wording** — Propose changes and the approved version will be embedded per option 1.
+
+---
+
+6. If the user chooses option 1 or 3, add the approved prompt to the plan file in this format:
+
+```markdown
+---
+
+## Initiation Prompt
+
+> **For the user:** Copy the prompt below into a clean agent session to begin implementation.
+> **For agents reading this file directly:** Skip this section and proceed to Phase 0.
+
+````text
+[The approved prompt]
+````
+
+---
+```
+
+Place this section after the plan header and before Required Reading. Use ` ```text ` fencing to visually distinguish the prompt from `go`, `sql`, and `bash` code blocks in the plan body.
+
+7. Update the plan's Pass 5 status to Complete.
 
 ---
 
 ## 15. Version Control
 
-**Specification Version:** 2.3.0
-**Last Updated:** 2026-02-01
+**Specification Version:** 2.5.0
+**Last Updated:** 2026-03-14
+
+**Changes in v2.5.0:**
+- Added Pass 5 presentation format: three user options (approve and embed, approve without embedding, edit wording)
+- Added plan embedding format: horizontal-rule-fenced section with `text`-fenced prompt block, placed before Required Reading
+- Added ` ```text ` fencing convention to visually distinguish initiation prompts from code blocks
+
+**Changes in v2.4.0:**
+- Renamed methodology from "4-Pass" to "5-Pass"
+- Added Pass 5: Initiation Prompt — produces a copy-pasteable prompt for clean-session execution
+- Added Pass 5 completion criteria, interaction protocol step, LLM instructions, and plan tracking template entry
+- Pass 5 constraint: prompt must not carry plan-specific information that only exists in the prompt, and must not contradict the plan or source documentation
 
 **Changes in v2.3.0:**
 - Added "The Documentation Lifecycle" section establishing the Interview → Documentation → Plan → Execution workflow

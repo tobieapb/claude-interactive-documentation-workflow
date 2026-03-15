@@ -12,6 +12,35 @@ Documents that do not meet these standards must be marked `**Status:** Draft` un
 
 ---
 
+## 0. LLM/Agent Directive
+
+### 0.1 Final Audit Trigger
+
+Do not perform the full expensive validation pass during ordinary drafting, brainstorming, or intermediate editing.
+
+Perform it only when one of these is true:
+
+- The user explicitly asks for a validation or compliance review
+- You are about to recommend changing a document's status to `**Status:** Complete`
+- You believe the document is ready to be considered complete
+
+At that point, stop ordinary drafting behavior and run the mandatory final expensive validation pass defined in Section 8.6.
+
+Interpret prompts such as:
+
+> Do a validation pass on this documentation file. Be thorough, detail oriented, exhaustive, methodical, careful, and analytical in checking for correctness, completeness, and compliance against the documentation crafting guidelines.
+
+as a command to enter final audit mode and perform the mandatory final expensive validation pass.
+
+In final audit mode:
+
+- Re-read the current file in full from top to bottom
+- Do not rely on earlier impressions or partial reads
+- Do not stop at obvious formatting checks
+- Actively search for correctness errors, completeness gaps, compliance violations, unintended consequences, second-order effects, and cross-document inconsistencies
+
+---
+
 ## Core Principles (Non-Negotiable)
 
 1. **Self-Sufficiency:** A reader should never need to consult another source to understand or execute the documentation.
@@ -520,6 +549,113 @@ For the document type, verify ALL required sections are present per Section 10 t
 | Database Schema | Overview, Schema table, Constraints, Indexes, Relationships, Examples, Verification |
 | Deployment Guide | Prerequisites, Env Vars, Steps (with verification each), Rollback |
 | Troubleshooting | Quick Diagnostics, Issues (with symptoms, diagnosis, resolution, prevention) |
+
+### 8.6: Final Expensive Validation Pass
+
+This is the full procedure referenced by Section 0.1 Final Audit Trigger.
+
+This pass is not required on every turn. It is required only at final validation time and is mandatory before changing a document's status from `Draft` to `Complete`.
+
+#### Required Audit Mindset
+
+This pass must be:
+
+- thorough
+- detail-oriented
+- exhaustive
+- methodical
+- careful
+- analytical
+
+Do not skim. Re-read the document as if you are trying to prove it is still incomplete, ambiguous, stale, inconsistent, misleading, or non-compliant.
+
+#### Required Validation Scope
+
+During this final pass, explicitly check all of the following:
+
+1. **Correctness**
+   - Are technical claims internally consistent?
+   - Do endpoint descriptions, field names, table names, configuration values, and examples match the documented system?
+   - Do examples contradict any other section of the document?
+   - Do references to other documents accurately describe what those documents contain?
+
+2. **Completeness**
+   - Does every section fully explain the concept it introduces?
+   - Are any required parameters, outputs, side effects, assumptions, or failure cases missing?
+   - Does any table, config entry, command, or example stop short of being fully useful?
+   - Would a reader still need to ask a clarifying question?
+
+3. **Compliance**
+   - Does the document satisfy every applicable rule in this guideline?
+   - Are all required metadata fields present?
+   - Are all code fences tagged?
+   - Are all commands accompanied by expected output and failure interpretation where required?
+   - Are all configuration entries documented with the required fields?
+   - Are there any forbidden phrases, placeholders, vague continuations, or shorthand omissions?
+
+4. **Cross-Document Integrity**
+   - Do links and cross-references include a summary of why they matter?
+   - Is the document still usable without leaving the file?
+   - If another file is cited as prerequisite knowledge, should that content be summarized inline here?
+
+5. **Operational Verifiability**
+   - Can operators or developers verify the major claims in the document?
+   - Are the verification instructions concrete enough to be actionable?
+   - Do commands and examples describe what success and failure look like?
+
+#### Impact and Second-Order Effects
+
+The final validation pass must also examine unintended consequences and second-order effects.
+
+Ask:
+
+- If a reader follows this documentation exactly, what could go wrong?
+- Does this document encourage any implementation, deployment, or operational behavior that would create downstream problems?
+- Does a local simplification here create inconsistency elsewhere in the system?
+- Could this document cause drift against another source of truth, plan, contract, schema, or workflow?
+- Does this documentation make any recommendation that is correct in isolation but harmful in the larger architecture?
+- Are any failure modes, rollback implications, performance consequences, or operational tradeoffs omitted?
+
+Check specifically for:
+
+- architectural inconsistencies introduced by oversimplification
+- commands or procedures that are correct but unsafe in realistic operation
+- configuration guidance that could cause performance, durability, or correctness problems
+- examples that normalize bad patterns
+- references that shift essential knowledge into another document and make this one misleadingly incomplete
+- statements that are technically true now but likely to become stale or misapplied
+
+A document is not complete if it is locally correct but systemically misleading.
+
+#### Required Validation Method
+
+The final pass must include:
+
+- a full re-read of the current file from top to bottom
+- a targeted search for forbidden phrases and placeholders
+- a check for untyped code fences
+- a check that required sections are present
+- a check that command, config, and table formats satisfy the guideline
+- a check that the document status matches the actual compliance state
+
+#### Required Final Self-Check
+
+Before marking the document complete, ask:
+
+- "If I were trying to reject this document, what specific defects would I cite?"
+- "What would a new engineer or operator still have to ask me?"
+- "What unintended consequences could result from someone following this document literally?"
+- "What second-order effects or downstream inconsistencies could this document cause?"
+- "Did I actually re-read the current file in full, or am I relying on earlier impressions?"
+- "Am I declaring this complete because it is truly compliant, or because the remaining issues feel minor?"
+
+If any of these questions produce a substantive issue, the document is not complete.
+
+#### Suggested Validation Prompt
+
+When requesting a final review, prompts such as the following should be interpreted as a command to enter final audit mode:
+
+> Do a validation pass on this documentation file. Be thorough, detail oriented, exhaustive, methodical, careful, and analytical in checking for correctness, completeness, and compliance against the documentation crafting guidelines.
 
 ---
 

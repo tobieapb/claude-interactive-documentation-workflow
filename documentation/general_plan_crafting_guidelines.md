@@ -553,41 +553,7 @@ The atomic checklist items from Pass 2 guide what goes inside each stub.
 
 ### 2.5. Pass 5: Initiation Prompt
 
-**Purpose:** Produce a copy-pasteable prompt the user can drop into a clean session to begin implementation. The prompt is the bridge between "the plan is approved" and "the plan is being executed."
-
-**Process:**
-1. Write a prompt that points the executor at the plan file and its required reading
-2. Include any environment presumptions (e.g., database accessible, toolchain installed)
-3. Instruct the executor to read the plan first and follow it phase by phase
-
-**Constraints:**
-- The prompt must not carry plan-specific information that only exists in the prompt
-- The prompt must not contain information that contradicts the plan or source documentation
-- If the prompt needs content not already in the plan, the plan is incomplete — go back and fix the plan first
-
-**When presenting the prompt for user approval, include the note:**
-
-> *This is a convenience — pointing the agent to the self-contained plan should be sufficient for full implementation. This prompt is provided for quality-of-life purposes.*
-
-**Example:**
-```
-Implement the plan at plans/molid_central_api_endpoints_plan.md
-
-Read the plan file and its Required Reading section first. Follow the
-phases in order. Stop at phase boundaries for verification. The plan
-contains boilerplate stubs, implementation hints, and verification
-commands for every action.
-
-Presumptions: Go 1.22+ installed, PostgreSQL 16+ accessible with
-mrnxstation schema deployed, swag tool installed.
-```
-
-**Pass 5 Completion Criteria:**
-- [ ] Prompt is 10 lines or fewer
-- [ ] Prompt contains only file paths, reading instructions, and environment presumptions
-- [ ] No plan-specific content exists only in the prompt
-- [ ] No contradiction with plan or source documentation
-- [ ] User has approved the prompt
+**The complete Pass 5 protocol — including presentation format, user options, and plan embedding — is defined in §14. Follow §14 exactly. Do not improvise the interaction.**
 
 ---
 

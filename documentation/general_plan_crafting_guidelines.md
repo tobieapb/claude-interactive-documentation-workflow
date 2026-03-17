@@ -223,6 +223,26 @@ The goal is to start implementation cleanly, without hidden assumptions and with
 If a refinement makes the plan more executable, more resumable, or less ambiguous, it is likely correct.
 If a refinement only increases volume, fragmentation, or mechanical busywork without improving execution quality, it is likely overdone.
 
+### 1.7. Calibrating Question
+
+At every pass, use this question to calibrate whether a refinement is actually improving the plan:
+
+> Does this change make correct execution more likely, with less guessing, at the level this pass is supposed to refine?
+
+If YES, keep it.
+If NO, it is probably process overhead rather than plan quality.
+
+This question exists to prevent two opposite failures:
+
+1. **Under-specification:** The plan leaves the executor to invent structure, behavior, contracts, or verification.
+2. **Over-specification:** The plan adds volume, fragmentation, or mechanical busywork without improving execution quality.
+
+The pass-specific rules still apply. This question does not replace them. It governs how borderline cases should be interpreted.
+
+Use it as the tie-breaker when a reviewer is unsure whether a proposed refinement is:
+- clarifying the plan, or
+- merely making it longer
+
 ---
 
 ## The Documentation Lifecycle

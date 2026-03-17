@@ -189,6 +189,40 @@ Every action and phase in a plan should be verifiable with a binary yes/no answe
 
 Consistent hierarchical format with no deviations. See Section 4 for the mandatory structure.
 
+### 1.6. Operating Principle of Each Pass
+
+The pass system exists to improve plan quality in stages without bloating the artifact or slowing the project with unnecessary detail. Each pass has a distinct purpose. Follow the spirit of that purpose, not a hyper-literal interpretation that produces low-value churn.
+
+#### Pass 1: Skeleton
+
+Build the correct structure first.
+The goal is complete coverage, valid sequencing, and correct decomposition of the work. Do not solve implementation details yet. Ensure nothing important is missing, nothing is orphaned, and the work is organized into a plan that can actually be executed.
+
+#### Pass 2: Atomicity
+
+Make actions executable and resumable.
+The goal is to break work into actions that are small enough to execute reliably and return to later without confusion, but not so small that the plan becomes absurd or unusable. A good Pass 2 action is one logical unit of work. It may contain slight internal complexity, but it must still represent a single intent, a single checkpoint, and a single completion state.
+
+#### Pass 3: Detail Enrichment
+
+Remove ambiguity without turning the plan into final code.
+The goal is to add the context, rationale, signatures, stubs, prerequisites, and implementation hints needed so that an executor does not have to invent architecture or behavior during implementation. Clarify decisions; do not bloat the plan with unnecessary micro-detail or full implementation code.
+
+#### Pass 4: Verification
+
+Make completion provable.
+The goal is to attach verification so that completion can be confirmed with minimal judgment. This is where the plan becomes a trustworthy execution artifact rather than a descriptive outline.
+
+#### Pass 5: Initiation Prompt
+
+Make execution handoff clean and constrained.
+The goal is to start implementation cleanly, without hidden assumptions and without storing plan-critical information only in the prompt. The prompt activates execution; it does not replace the plan.
+
+#### Practical Rule
+
+If a refinement makes the plan more executable, more resumable, or less ambiguous, it is likely correct.
+If a refinement only increases volume, fragmentation, or mechanical busywork without improving execution quality, it is likely overdone.
+
 ---
 
 ## The Documentation Lifecycle

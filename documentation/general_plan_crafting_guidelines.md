@@ -237,11 +237,16 @@ This question exists to prevent two opposite failures:
 1. **Under-specification:** The plan leaves the executor to invent structure, behavior, contracts, or verification.
 2. **Over-specification:** The plan adds volume, fragmentation, or mechanical busywork without improving execution quality.
 
-The pass-specific rules still apply. This question does not replace them. It governs how borderline cases should be interpreted.
-
-Use it as the tie-breaker when a reviewer is unsure whether a proposed refinement is:
+Use this as the tie-breaker when a reviewer is unsure whether a proposed refinement is:
 - clarifying the plan, or
 - merely making it longer
+
+Sections 1.6 and 1.7 are not meant to weaken the requirements and completion criteria for each pass. They exist to calibrate refinement toward a level of execution closer to high excellence, without unnecessary busywork or nitpicking. They are interpretive tools, not replacement standards.
+
+**Execution Order:**
+1. Check compliance against the explicit requirements and completion criteria for the current pass.
+2. Use Sections 1.6 and 1.7 only to resolve borderline judgment calls.
+3. Do not use Sections 1.6 and 1.7 to excuse a clear formal defect.
 
 ---
 

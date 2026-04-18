@@ -11,8 +11,12 @@ There are many ways to vibe code, but this one will allow you to understand the 
 This is a **complete workflow** for the documentation lifecycle:
 
 ```
-Interview → Documentation → Plan → Implementation
+Interview ─┐
+           ├──► Documentation → Plan → Implementation
+Investigation ┘
 ```
+
+Not every feature starts from a clean interview. In practice, a lot of real work begins with messy, loose, scratchpad-style information gathering about something that already exists or is suspected to be broken. That loose pile of notes is an **investigation**. When it matures, it feeds the same downstream artifacts (documentation and/or plan) that a structured interview would.
 
 Each stage has explicit guidelines, checkpoints, and quality gates. The methodology is designed to:
 
@@ -82,11 +86,35 @@ following documentation/general_plan_crafting_guidelines.md
 
 Plans go in `plans/` and follow a similar 4-pass methodology.
 
-## The Three Core Documents
+## Investigations: When You're Starting from the Mess, Not From a Blank Page
+
+In real projects, a lot of work does not start with "let's interview someone to shape a clean new feature." It starts with "something is strange here," "we need to understand what the current system actually does before we can change it," or "I have a pile of observations and I need to organize them before I can even decide what to plan."
+
+That work lives in **investigations**, in the `investigations/` folder. An investigation is allowed to start loose:
+
+- rough notes, copy-pasted log snippets, file paths, timestamps, hunches
+- questions with no answers yet
+- open-ended "what does this do?" exploration
+- cross-subsystem observations that may or may not be related
+
+The value of the folder is that this information is **minimally persisted in git** rather than floating in chat logs, scratchpad files, or someone's head. You can come back to it in a week, a month, or six months.
+
+When the investigation matures to the point where it needs to feed planning or documentation, the full standards in [`general_investigation_review_guidelines.md`](documentation/general_investigation_review_guidelines.md) kick in. A mature investigation answers the ten completion questions in §5 of that document and produces a clean hand-off to the next artifact (a plan, a documentation file, or both). Until that point, it's fine for the file to be rough — the guidelines describe the **finished form**, not a gate that every early-stage note must pass.
+
+The naming convention is `<subject>_investigation.md`. Common examples:
+
+- `auth_drift_state_machine_investigation.md`
+- `ingress_rate_limiting_investigation.md`
+- `settings_reload_investigation.md`
+
+When an investigation has served its purpose (fed a plan or documentation file, or been superseded), move it to `archive/investigations/`.
+
+## The Four Core Documents
 
 | Document | Purpose |
 |----------|---------|
 | [`general_interview_methodology_skill.md`](documentation/general_interview_methodology_skill.md) | How to conduct structured interviews to extract requirements |
+| [`general_investigation_review_guidelines.md`](documentation/general_investigation_review_guidelines.md) | Standards for investigation files (the "what's actually going on" artifact) |
 | [`general_documentation_crafting_guidelines.md`](documentation/general_documentation_crafting_guidelines.md) | Standards for documentation (the "what to build" artifact) |
 | [`general_plan_crafting_guidelines.md`](documentation/general_plan_crafting_guidelines.md) | Standards for implementation plans (the "how to build" artifact) |
 
@@ -97,15 +125,20 @@ Plans go in `plans/` and follow a similar 4-pass methodology.
 ├── documentation/          # Canonical feature documentation lives here
 │   ├── general_*           # The methodology documents
 │   └── your_docs_here.md   # Your project's documentation
+├── investigations/         # Loose-to-structured evidence gathering
+│   └── your_investigation.md
 ├── plans/                  # Implementation plans live here
 ├── archive/                # Completed/obsolete items
 │   ├── plans/
-│   └── documentation/
+│   ├── documentation/
+│   └── investigations/
 └── .claude/
     └── skills/
         └── interview/
             └── SKILL.md    # The installed /interview skill
 ```
+
+Projects with multiple subsystems can mirror this shape at each subsystem boundary (e.g. `backend/documentation/`, `backend/investigations/`, `backend/plans/`, `backend/archive/`) so artifacts stay local to the code they describe. The methodology is the same at every level.
 
 ## Key Principles
 
@@ -256,4 +289,4 @@ Found an improvement? PRs welcome. The bar is high—these documents enforce the
 
 ---
 
-**Last Updated:** 2026-02-27
+**Last Updated:** 2026-04-18

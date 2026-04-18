@@ -517,9 +517,9 @@ A reader returning to the file in six months should understand the investigation
 
 The resolution path is not a free choice. Use these criteria, in order:
 
-1. **Does the investigation contain specification-worthy material that is not already canonical?** → Write new documentation, or update existing documentation if the relevant canonical doc is already in place.
-2. **Is there a concrete implementation gap ready to be resolved?** → Craft a plan.
-3. **Do 1 and 2 both apply?** → Documentation first, then plan against it.
+1. **Is the main need to formalize behavior, contracts, or rules that should become standing repo guidance before implementation?** → Write new documentation, or update existing documentation if the relevant canonical doc is already in place.
+2. **Is the main need to resolve implementation or design decisions and drive execution?** → Craft a plan.
+3. **Do 1 and 2 both apply?** → Documentation first, then plan against it. A plan that precedes its canonical doc tends to drift from canon and then silently redefine it.
 4. **Neither 1 nor 2 applies?** → Archive with a findings summary. This is a valid and common outcome; many investigations conclude in "we now know this, but no change is needed."
 5. **Is the investigation covering multiple distinct concerns?** → Split before applying 1–4 to each resulting file.
 
@@ -535,7 +535,42 @@ The completion standard in §12 describes the strictest bar: ready to feed a pla
 
 ### 13.5 Who Decides the Path
 
-The resolution path is a judgment call. The investigating agent must propose a path with reasoning (based on §13.3 criteria). The user confirms or redirects before the path is executed. Do not default to a plan or documentation file silently — the "archive with findings summary" outcome is too common to skip over.
+The resolution path is a judgment call. The investigating agent must propose a path with **explicit reasoning**: state which §13.3 criterion drove the choice and, if not obvious, why the other paths were rejected. The user confirms or redirects before the path is executed. Do not default to a plan or documentation file silently — the "archive with findings summary" outcome is too common to skip over.
+
+### 13.6 Executing the Chosen Path
+
+Once the user confirms the path, the agent follows the requirements below before, during, and after producing the resulting artifact.
+
+**Before writing:**
+
+- Read the project's rules files (e.g. `CLAUDE.md` and any `.claude/rules/*.md`) and follow them.
+- Read the crafting guidelines for the chosen path:
+  - Writing new documentation or updating existing documentation → `general_documentation_crafting_guidelines.md`
+  - Crafting a plan → `general_plan_crafting_guidelines.md`
+- Read every canonical document the investigation references. Treat those as the source of truth for any fixed behavior, contract, threshold, deployment convention, or authority boundary identified in the investigation. **Never silently change canonical behavior.** If the investigation found that canon itself needs to change, surface that as an explicit decision requiring owner approval *before* the new artifact is written.
+- If the path is "update existing documentation," read the existing doc end-to-end before editing. Do not patch a doc without first understanding what it currently says.
+
+**While writing:**
+
+Preserve the investigation's most important structural property in the resulting artifact: **keep the evidence layers cleanly separated.** The artifact must make it obvious which claims are:
+
+- already canonically specified
+- what the current system already implements
+- what gap remains (if any)
+- what decisions are still plan-level rather than canonical
+
+If the artifact proposes structure, contracts, or details beyond what the canonical docs establish, label those proposals explicitly as plan-level decisions. Do not let them read as canon.
+
+The artifact must be concrete enough for implementation (or, for documentation, operational use) to proceed without ambiguity, and it must match repo style and the relevant crafting guidelines.
+
+**After writing:**
+
+Report back to the user in the same response, stating:
+
+- which file was created or updated (path)
+- which §13.1 path was taken and why (referencing §13.3)
+- the key decisions captured in the new artifact
+- any open questions that still require owner input
 
 ---
 

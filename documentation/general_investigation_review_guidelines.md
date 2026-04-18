@@ -12,6 +12,72 @@ It exists to eliminate guesswork before planning. A weak investigation produces 
 
 ---
 
+## 0. Activation Triggers
+
+### 0.1 User-Initiated Triggers
+
+When the user says any of the following, or close variations, the agent must activate investigation mode and begin creating an investigation file.
+
+| Trigger Phrase | Intent |
+|----------------|--------|
+| "let's open an investigation on X" | Create a new investigation file scoped to X |
+| "open an investigation on X" | Same |
+| "start an investigation on X" | Same |
+| "investigate X" | Same |
+| "let's investigate X" | Same |
+| "let's look into X" | Same, often loose-scratchpad framing |
+| "let's dig into X" | Same |
+| "gather info on X" / "gather info about X" | Same, evidence-gathering framing |
+| "scratchpad this" / "let's scratchpad X" | Open a loose investigation |
+| "what's going on with X" / "let's figure out what's going on with X" | Same, framed as active exploration |
+
+When any of these triggers fire, the agent must, in order:
+
+1. **Confirm the scope target.** Identify what X is and which subsystem it belongs to. If ambiguous, ask a single scoping question. If the repo has per-subsystem `investigations/` folders, pick the one that matches X. If the scope is cross-subsystem or system-wide, use the top-level `investigations/` folder. See §0.3.
+2. **Choose a filename.** Format: `{subject}_investigation.md`, snake_case subject, describing the subject concretely. Avoid cute prefixes. Examples: `settings_reload_investigation.md`, `auth_drift_state_machine_investigation.md`, `ingress_rate_limiting_investigation.md`.
+3. **Create a minimal starting scaffold.** The file at birth should contain at least a one-line problem statement and an empty findings area. It does NOT need to be well-organized at the first keystroke. The scaffold is a placeholder the investigation grows into.
+4. **Begin gathering.** The first pass is allowed to be loose. Record what is observed, where it was observed, and what questions it raises. Use concrete references (file paths, function names, config keys, SQL names) whenever possible per §6. Do not prematurely classify findings into authority / current-implementation / gap / plan-decision / open-question (§3). Classification happens when the investigation matures toward the completion standard in §12.
+5. **Persist early.** Write to disk before the notes feel "finished." The value of the `investigations/` folder is that rough work survives beyond a chat session.
+
+### 0.2 What the Trigger Does NOT Require
+
+The trigger does not demand that the investigation be complete, organized, or even coherent at start-time. It opens a file and begins capture. The completion standards in §12 describe what "ready to feed planning" looks like; that is a later state, not an entry requirement.
+
+Common mistake on entry: treating a trigger as a demand to produce a finished investigation in one response. The correct initial action is to create the file with a thin scaffold, make the first few concrete entries, and continue from there.
+
+### 0.3 Scope and Subsystem Placement
+
+If the repo uses per-subsystem folders (`central-server/investigations/`, `stations/{service}/investigations/`, `tooling/{tool}/investigations/`, etc.), drop the file under the folder that matches the subject. If the scope is cross-subsystem or genuinely system-wide, use the top-level `investigations/` folder.
+
+Never create a new `investigations/` folder without first checking that the target subsystem doesn't already own one. Folder proliferation is a sign the agent hasn't surveyed the repo.
+
+### 0.4 Minimum Starting Scaffold
+
+The first write to a freshly opened investigation should look roughly like:
+
+```markdown
+# {Subject} Investigation
+
+**Status:** Open
+**Opened:** YYYY-MM-DD
+
+## Problem Statement
+
+{One or two sentences: what are we investigating and why now.}
+
+## Findings
+
+{Empty. First findings go here as they come in — file paths, observations, questions.}
+
+## Open Questions
+
+{Empty. Questions accumulate here as they surface.}
+```
+
+This is not the final shape of the document; §3–§12 describe what the mature form looks like. The scaffold is the minimum the agent must produce to open the file successfully. Everything else accumulates through the normal work of the investigation.
+
+---
+
 ## 1. What an Investigation Is
 
 An investigation is a scoped technical discovery document that:
@@ -485,6 +551,6 @@ When using the standard prompt, replace `<path-to-investigation>` with the actua
 
 ---
 
-**Last Updated:** 2026-03-21
+**Last Updated:** 2026-04-18
 **Status:** Complete
 **Owner:** MarNexii Platform Team

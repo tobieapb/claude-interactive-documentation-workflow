@@ -292,19 +292,19 @@ Examples:
 
 These should be phrased as decisions to resolve, not disguised as settled fact.
 
-### 4.9 Plan Handoff
+### 4.9 Closing Summary
 
-End the investigation with a section that makes planning straightforward.
+End the investigation with a section that makes the next step straightforward — whatever that next step turns out to be (§13 enumerates the options).
 
 At minimum, summarize:
 
 - what is already decided by authority
 - what current implementation already provides
-- what gap must be closed
-- what the next plan must decide
+- what gap, if any, must be closed
+- what decisions the next artifact (plan, documentation, or edit) must make
 - what questions still need owner input
 
-The investigation should hand planning a clean starting point.
+This section is what a reader — or a planner, or a documentation author, or a future self returning to an archived investigation — uses to orient without re-reading the whole file.
 
 ---
 
@@ -414,7 +414,7 @@ A strong investigation has these properties:
 - the current implementation map is concrete and trustworthy
 - the real gap is clearly identified
 - open decisions are explicit
-- the plan handoff is clean
+- the closing summary is clean and points at a concrete next step
 
 After reading it, a planner should not need to rediscover:
 
@@ -486,68 +486,56 @@ If a planner would still need to ask "what exactly are we building?", "what alre
 
 ---
 
-## 13. Post-Signoff Handoff
+## 13. Concluding an Investigation: Resolving the Next Step
 
-When an investigation is found complete enough to feed planning, the reviewing agent must do all of the following in the same response:
+An investigation concludes by **resolving what happens next** — not by handing off to a generic "next agent." At conclusion, one of the following paths is chosen and acted on.
 
-1. State explicitly that the investigation is ready to feed planning.
-2. State any non-blocking observations that remain.
-3. Provide the standard initiation prompt for the next agent without waiting to be asked.
+### 13.1 Resolution Paths
 
-The handoff prompt must instruct the next agent to:
+| Path | When to Choose | Action |
+|------|----------------|--------|
+| **Write new documentation** | The investigation established stable, authoritative understanding of a subsystem, feature, or behavior that does not yet exist in `documentation/`. | Create the doc per `general_documentation_crafting_guidelines.md`. The investigation feeds it. |
+| **Craft a plan** | The investigation identified a concrete implementation gap and the decisions needed to close it are clear or well-scoped. | Create the plan per `general_plan_crafting_guidelines.md`. The investigation feeds it. |
+| **Update existing documentation** | The investigation found that existing canonical documentation is incorrect, incomplete, or out of date — but the overall subsystem already has a canonical doc. | Edit the existing doc. Reference the investigation in the commit message. |
+| **Archive with findings summary** | The investigation answered its question but the answer is not action-inducing (confirming correct behavior, closing off a hypothesis, capturing state for future reference, or ruling out a concern). | Prepend a Findings Summary (see §13.2) to the top of the investigation, then move the file to `archive/investigations/`. |
+| **Split into multiple** | The investigation grew into multiple distinct concerns that deserve separate treatment. | Carve new investigation files out of the original, each with its own scope. The original becomes an index of pointers, or is archived with a summary. |
 
-- read the investigation as the starting point
-- decide whether the correct next artifact is a plan or a documentation file
-- follow `documentation/general_plan_crafting_guidelines.md` if producing a plan
-- follow `documentation/general_documentation_crafting_guidelines.md` if producing documentation
-- create the file in the correct repo location
-- summarize which file was created, why that artifact type was chosen, and any open questions still requiring owner decision
+The paths are not mutually exclusive. A single investigation commonly produces both a documentation update *and* a plan. In that case, choose the order (usually documentation first, then plan against it), execute both, and record both in the findings summary.
 
-A signoff without the handoff prompt is incomplete.
+### 13.2 The Findings Summary
 
-### Standard Initiation Prompt
+Every concluded investigation — regardless of which resolution path is taken — must have a **Findings Summary** block at or near the top of the file. The summary states:
 
-```text
-Read the investigation at `<path-to-investigation>` and use it as the starting point for the next authoritative implementation artifact.
+- What was investigated
+- What was concluded
+- Which resolution path was chosen
+- Pointer to any artifact the investigation produced (plan file path, documentation file path, edit commit hash, or "archived — no action taken")
 
-Your task is to decide whether the correct next artifact is:
-1. a plan file, following `documentation/general_plan_crafting_guidelines.md`, or
-2. a documentation file, following `documentation/general_documentation_crafting_guidelines.md`.
+A reader returning to the file in six months should understand the investigation's conclusion from the summary alone, without re-reading the evidence below it. The summary's job is to make the file's evidence optional for the casual reader and retrievable for the investigator.
 
-Decision rule:
-- Choose a plan if the main need is to resolve implementation/design decisions and drive execution.
-- Choose a documentation file if the main need is to formalize behavior/specification that should become standing repo guidance before implementation.
-- State explicitly why you chose one or the other.
+### 13.3 Criteria for Choosing a Path
 
-Requirements:
-- Before writing anything, read and follow:
-  - `CLAUDE.md`
-  - `.claude/rules/project_instructions.md`
-- If producing a plan, read and follow:
-  - `documentation/general_plan_crafting_guidelines.md`
-- If producing documentation, read and follow:
-  - `documentation/general_documentation_crafting_guidelines.md`
-- Read all canonically relevant docs referenced by the investigation.
-- Treat the canonical documentation as the source of truth for any fixed behavior, contract, threshold, deployment convention, or authority boundary identified by the investigation.
-- Do not silently change canonical behavior.
-- Make the resulting artifact clearly separate:
-  - what is already canonically specified
-  - what is currently implemented
-  - what gaps remain
-  - what decisions are still plan-level rather than canonical
-- If you propose structure or contract details beyond the canonical docs, label them explicitly as implementation/plan-level decisions, not canon.
-- The result must be concrete enough for implementation to proceed without ambiguity and must match repo style and crafting guidance.
+The resolution path is not a free choice. Use these criteria, in order:
 
-Deliverable:
-- Create the appropriate file in the correct repo location.
-- In your final response, summarize:
-  - which file you created
-  - why that artifact type was chosen
-  - the key implementation decisions captured
-  - any open questions that still require owner decision
-```
+1. **Does the investigation contain specification-worthy material that is not already canonical?** → Write new documentation, or update existing documentation if the relevant canonical doc is already in place.
+2. **Is there a concrete implementation gap ready to be resolved?** → Craft a plan.
+3. **Do 1 and 2 both apply?** → Documentation first, then plan against it.
+4. **Neither 1 nor 2 applies?** → Archive with a findings summary. This is a valid and common outcome; many investigations conclude in "we now know this, but no change is needed."
+5. **Is the investigation covering multiple distinct concerns?** → Split before applying 1–4 to each resulting file.
 
-When using the standard prompt, replace `<path-to-investigation>` with the actual repository-relative path of the signed-off investigation file.
+Never close an investigation without a resolution. "The investigation is complete" is not a conclusion on its own — it must be paired with one of the paths above.
+
+### 13.4 Completion Bar for Each Path
+
+The completion standard in §12 describes the strictest bar: ready to feed a plan. The paths in §13.1 have different bars:
+
+- **Write/update documentation** and **craft a plan** paths → meet the full §12 standard before proceeding.
+- **Archive with findings summary** path → the bar is lower. What is required is that the findings summary accurately states what was concluded and why no further action is needed. The file's evidence does not need the full §12 rigor; an archived investigation is a historical record, not a planning input.
+- **Split into multiple** path → each resulting investigation is evaluated against §12 for its own chosen resolution path.
+
+### 13.5 Who Decides the Path
+
+The resolution path is a judgment call. The investigating agent must propose a path with reasoning (based on §13.3 criteria). The user confirms or redirects before the path is executed. Do not default to a plan or documentation file silently — the "archive with findings summary" outcome is too common to skip over.
 
 ---
 

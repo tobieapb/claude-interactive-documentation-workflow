@@ -1,8 +1,8 @@
 # Plan Crafting Guidelines v2.0: The Unified Methodology
 
-**Version:** 2.3.0
+**Version:** 2.6.0
 **Status:** Complete
-**Last Updated:** 2026-02-01
+**Last Updated:** 2026-03-20
 **Purpose:** This document is the single, self-contained, mandatory standard for creating implementation plans. It supersedes all previous plan crafting guidelines and integrates all lessons from iterative plan development.
 
 ---
@@ -68,6 +68,8 @@ When creating a plan:
 5. **Pass 5 (Initiation Prompt):** Write the executor prompt, then STOP and present for user approval
 
 **Write the plan to the file after each pass.** The file is the source of truth, not your context window.
+
+**When reviewing a pass** (your own or another agent's): evaluate ONLY against the current pass's completion criteria. See §2.6 (Pass Review Protocol) for the full rules. Findings that belong to a later pass are not blockers.
 
 ### 0.5. Summary Checklist for LLMs
 
@@ -345,6 +347,8 @@ These are acceptable in Pass 1 because they establish WHAT needs to happen witho
 
 ### 2.2. Pass 2: Atomicity
 
+**Swarm Evaluation:** Before starting this pass, if the plan has 100+ actions across 3+ non-N/A phases, evaluate whether the work can be parallelized across multiple agents. Each phase's atomicity work is independent — splitting by phase boundaries is natural. See `documentation/general_agent_swarm_execution_guidelines.md` for the full methodology. If the swarm is appropriate, offer it to the user before proceeding.
+
 **Purpose:** Transform compound actions into single, executable steps.
 
 **The 5-Second Rule:**
@@ -453,6 +457,8 @@ AFTER:
 - [ ] File paths match documentation exactly
 
 ### 2.3. Pass 3: Detail Enrichment
+
+**Swarm Evaluation:** Before starting this pass, if the plan has 100+ actions across 3+ non-N/A phases, evaluate whether the work can be parallelized. Enrichment work varies in complexity — split by new-file objectives (need boilerplate stubs) vs annotation-only objectives (need prerequisites and rationale). See `documentation/general_agent_swarm_execution_guidelines.md` for the full methodology. If the swarm is appropriate, offer it to the user before proceeding.
 
 **Purpose:** Eliminate all remaining ambiguity by adding context without writing full implementations.
 
@@ -570,6 +576,8 @@ The atomic checklist items from Pass 2 guide what goes inside each stub.
 
 ### 2.4. Pass 4: Verification
 
+**Swarm Evaluation:** Before starting this pass, if the plan has 100+ actions across 3+ non-N/A phases, evaluate whether the work can be parallelized. Verification work splits naturally by risk domain — DB/transaction verification, HTTP/auth verification, output/rendering verification, deployment verification. See `documentation/general_agent_swarm_execution_guidelines.md` for the full methodology. If the swarm is appropriate, offer it to the user before proceeding.
+
 **Purpose:** Make every action provably complete.
 
 **The Binary Test:**
@@ -613,6 +621,33 @@ The atomic checklist items from Pass 2 guide what goes inside each stub.
 ### 2.5. Pass 5: Initiation Prompt
 
 **The complete Pass 5 protocol — including presentation format, user options, and plan embedding — is defined in §14. Follow §14 exactly. Do not improvise the interaction.**
+
+### 2.6. Pass Review Protocol
+
+**When reviewing a pass — whether self-reviewing or reviewing another agent's output — evaluate ONLY against that pass's completion criteria.**
+
+Each pass has a defined scope. A review that reaches beyond that scope conflates two distinct failure modes: (1) the pass is incomplete at the level it is supposed to refine, and (2) later-pass concerns that are not yet supposed to be resolved. Only the first is a valid finding. The second is noise that derails the iterative refinement process.
+
+**Rules for reviewers:**
+
+1. **Evaluate against the pass's explicit completion criteria.** These are listed in the pass's section (§2.1–§2.5). If a finding does not map to a completion criterion for the current pass, it is not a finding for this review.
+2. **Forward-looking observations are not findings.** If you notice a design correctness issue, a field-level completeness gap, or an implementation ambiguity that belongs to a later pass, you may note it as a non-blocking observation. Do not classify it as a defect, do not count it against pass compliance, and do not block the pass on it.
+3. **Do not evaluate design decisions during skeleton review (Pass 1).** Pass 1 establishes structure and coverage. Whether a design decision is optimal, whether a retention bound is tight, or whether a field set is complete are Pass 2/3 concerns. Pass 1 asks: "Are all the things we need to do represented as objectives with valid dependencies?" It does not ask: "Is the proposed algorithm for each objective correct?"
+4. **Do not evaluate atomicity during skeleton review (Pass 1).** Compound actions are explicitly permitted in Pass 1. "This action does three things" is not a Pass 1 finding.
+5. **Do not evaluate verification coverage before Pass 4.** Missing verification commands are not findings during Passes 1–3.
+
+**The calibrating question for reviewers:**
+
+> "Is this finding about a defect at the level this pass is supposed to refine, or am I reaching into a later pass's scope?"
+
+If the answer is "later pass," note it as a forward-looking observation and move on.
+
+| Pass Under Review | Valid Findings | Not Valid Findings (Belongs to Later Pass) |
+|---|---|---|
+| **Pass 1 (Skeleton)** | Missing phase, missing objective, orphan objective, broken dependency DAG, forbidden phrase, missing required reading | Design decision correctness, field-level completeness, action atomicity, implementation ambiguity, verification commands |
+| **Pass 2 (Atomicity)** | Compound actions, multi-verb titles, missing file references, conditional language in titles | Code block completeness, rationale depth, prerequisite chains, verification commands |
+| **Pass 3 (Detail Enrichment)** | Missing boilerplate stubs, ambiguous actions, missing rationale for non-obvious choices, missing prerequisites | Verification commands, test coverage, deployment steps |
+| **Pass 4 (Verification)** | Missing verification on critical paths, non-executable verification commands, missing phase checklists | Initiation prompt quality |
 
 ---
 
@@ -1535,8 +1570,14 @@ Place this section after the plan header and before Required Reading. Use ` ```t
 
 ## 15. Version Control
 
-**Specification Version:** 2.5.0
-**Last Updated:** 2026-03-14
+**Specification Version:** 2.6.0
+**Last Updated:** 2026-03-20
+
+**Changes in v2.6.0:**
+- Added §2.6 Pass Review Protocol — explicit rules for scoping reviews to the current pass's completion criteria
+- Added valid/invalid findings table per pass to prevent reviewers from over-scoping (e.g., critiquing design correctness during Pass 1 skeleton review)
+- Added reviewer-facing note in §0.4 Interaction Protocol pointing to §2.6
+- Added reviewer calibrating question: "Is this finding about a defect at the level this pass is supposed to refine, or am I reaching into a later pass's scope?"
 
 **Changes in v2.5.0:**
 - Added Pass 5 presentation format: three user options (approve and embed, approve without embedding, edit wording)
@@ -1581,5 +1622,5 @@ Place this section after the plan header and before Required Reading. Use ` ```t
 
 ---
 
-**Last Updated:** 2026-02-01
+**Last Updated:** 2026-03-20
 **Status:** Complete

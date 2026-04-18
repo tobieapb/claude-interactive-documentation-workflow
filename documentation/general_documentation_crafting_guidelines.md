@@ -1277,7 +1277,7 @@ WHERE event_type_id = '550e8400-e29b-41d4-a716-446655440000'
 **Examples:**
 - `documentation/webapp_deployment_architecture.md`
 - `documentation/station_ingestion_paradigm.md`
-- `documentation/project_architecture.md`
+- `documentation/station_edge_architecture.md`
 
 ### 11.2: Code-Specific Documentation → Keep with code
 
@@ -1292,7 +1292,27 @@ WHERE event_type_id = '550e8400-e29b-41d4-a716-446655440000'
 - `stations/webapp-service/client/README.md`
 - `stations/ingress-service/README.md`
 
-### 11.3: Planning and Scratchpads → `/plans/` folder
+### 11.3: Official Vendor Manuals → `/documentation/official_manuals/`
+
+**What goes here:**
+- Vendor-provided PDFs: datasheets, user manuals, quick start guides, API guides
+- Copies of official manufacturer documentation for hardware and devices used in MarNexii stations
+- Kept in the repo for offline access and version pinning
+
+**Naming convention:** `official_{manufacturer}_{model_or_product}_{type}_reference.pdf`
+
+- `official_` prefix — identifies vendor-provided material (not MarNexii-authored)
+- `{manufacturer}` — lowercase manufacturer name (e.g., `uniview`, `quectel`, `beelink`)
+- `{model_or_product}` — model number or product name, lowercase with underscores
+- `{type}` — document type (e.g., `datasheet`, `user_manual`, `quick_start`, `api_guide`)
+- `_reference.pdf` suffix — consistent with project naming conventions, retains `.pdf` extension
+
+**Examples:**
+- `documentation/official_manuals/official_uniview_ipc9312lfw_datasheet_reference.pdf`
+- `documentation/official_manuals/official_uniview_network_camera_user_manual_reference.pdf`
+- `documentation/official_manuals/official_quectel_ec25_at_commands_reference.pdf`
+
+### 11.4: Planning and Scratchpads → `/plans/` folder
 
 **What goes here:**
 - Work-in-progress planning documents

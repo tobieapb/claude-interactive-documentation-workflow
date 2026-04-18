@@ -1,5 +1,7 @@
 # Plan Crafting Guidelines v2.0: The Unified Methodology
 
+**Canonical Source:** https://github.com/tobieapb/claude-interactive-documentation-workflow
+
 **Version:** 2.6.0
 **Status:** Complete
 **Last Updated:** 2026-03-20

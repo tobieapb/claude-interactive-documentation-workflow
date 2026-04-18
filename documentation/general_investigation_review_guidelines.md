@@ -1,5 +1,7 @@
 # Investigation Guidelines
 
+**Canonical Source:** https://github.com/tobieapb/claude-interactive-documentation-workflow
+
 **Purpose:** Define the mandatory standard for writing forward-looking investigation files that gather the evidence needed before planning work for a feature, endpoint, subsystem, workflow, or behavior that does not yet exist or is not yet fully defined.
 
 An investigation is the bridge between:

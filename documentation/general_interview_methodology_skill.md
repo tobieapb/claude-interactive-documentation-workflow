@@ -1,5 +1,7 @@
 # Interview Methodology Skill
 
+**Canonical Source:** https://github.com/tobieapb/claude-interactive-documentation-workflow
+
 **Purpose:** Structured, iterative interview process to create canonical feature documentation before planning begins.
 
 **Version:** 2.0.0

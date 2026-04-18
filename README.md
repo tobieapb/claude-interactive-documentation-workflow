@@ -1,5 +1,8 @@
 # Claude Interactive Documentation Workflow
 
+> **Canonical Source:** https://github.com/tobieapb/claude-interactive-documentation-workflow
+> **Agents seeding a working repo with this methodology:** read [`documentation/general_methodology_adoption_recipe.md`](documentation/general_methodology_adoption_recipe.md) first. It is the single action-oriented reference for what to copy, where to put it, and what to paste into the host repo's `.claude/CLAUDE.md`.
+
 I used to whiteboard, then code. Now I markdown, then code.
 
 There are many ways to vibe code, but this one will allow you to understand the code that is being built, come back to it 6 months later and actually understand it, and more importantly, craft user-facing documentation artifacts trivially. The canonical documentation and plan files are actually kind of awesome for giving LLMs immediate, complete, and effective context to keep them guardrailed, without too much wrangling.

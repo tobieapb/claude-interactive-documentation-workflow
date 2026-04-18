@@ -4,7 +4,7 @@
 
 **Author:** Roberto Rivera (@tobieapb)
 **Analysis performed by:** Claude (Opus 4.6), February 6-7, 2026
-**Methodology repository:** https://github.com/tobieapb/claude-interactive-documentation-workflow
+**Canonical Source:** https://github.com/tobieapb/claude-interactive-documentation-workflow
 
 ---
 
@@ -263,8 +263,6 @@ The methodology evolved through production use across 3+ projects over 4 months 
 The methodology described in the public repository is not a theoretical framework. It is extracted from verified, production practice across multiple complex technical domains. The git history provides tamper-resistant timestamps. The conversation session analysis provides behavioral consistency evidence. The documentation and plan artifacts exist as durable, version-controlled proof.
 
 The core thesis — *"I used to whiteboard, then code. Now I markdown, then code."* — is substantiated by the evidence. The investment in structured planning produces compressed execution timelines, free documentation artifacts, and sustainable project re-onboarding. This is AI-assisted development with engineering discipline: directed, reproducible, and auditable.
-
-**Methodology repository:** https://github.com/tobieapb/claude-interactive-documentation-workflow
 
 **Verification:** All timestamps, commit hashes, file counts, and line counts cited in this document can be independently verified against the git histories of the referenced repositories. Access to private repositories can be granted upon request for audit purposes.
 

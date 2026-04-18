@@ -1,5 +1,7 @@
 # User-Level Rules Template
 
+**Canonical Source:** https://github.com/tobieapb/claude-interactive-documentation-workflow
+
 Deploy this file to `~/.claude/CLAUDE.md` on each machine. It provides universal rules that apply across all projects.
 
 **Deployment:**
@@ -7,7 +9,7 @@ Deploy this file to `~/.claude/CLAUDE.md` on each machine. It provides universal
 cp documentation/general_user_level_rules_template.md ~/.claude/CLAUDE.md
 ```
 
-**Canonical source:** This template is maintained in the `claude-interactive-documentation-workflow` repository. When updating rules, update this file first, then redeploy to each machine.
+This template is maintained in the canonical repository (see header). When updating rules, update this file first, then redeploy to each machine.
 
 ---
 

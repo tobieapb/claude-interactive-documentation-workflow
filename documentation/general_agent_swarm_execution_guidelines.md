@@ -1,5 +1,7 @@
 # Agent Swarm Execution Guidelines
 
+**Canonical Source:** https://github.com/tobieapb/claude-interactive-documentation-workflow
+
 **Purpose:** This document defines a general methodology for parallelizing work across multiple AI agents ("agent swarm"). The methodology is task-agnostic — it applies to plan passes, codebase-wide fixes, documentation updates, or any parallelizable work. The process has three phases: **Pre-Work** (formalize the goal, rules, and constraints into a dispatch brief), **Dispatch** (size the swarm, distribute work, launch agents), and **Post-Work** (validate the output against the dispatch brief and broader project constraints).
 
 The dispatch brief is the connecting artifact: pre-work produces it, dispatch consumes it, post-work validates against it.

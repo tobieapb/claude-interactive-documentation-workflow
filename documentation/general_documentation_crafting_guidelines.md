@@ -1,5 +1,7 @@
 # Documentation Crafting Guidelines: Enforcement Edition
 
+**Canonical Source:** https://github.com/tobieapb/claude-interactive-documentation-workflow
+
 **Purpose:** Establish mandatory documentation standards for the MarNexii project. These are not suggestions—they are **hard requirements** that must be met for documentation to be considered complete.
 
 ---

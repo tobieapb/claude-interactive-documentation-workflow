@@ -1,5 +1,7 @@
 # Claude Session Rules and Machine Configuration
 
+**Canonical Source:** https://github.com/tobieapb/claude-interactive-documentation-workflow
+
 Standards for governing Claude Code behavior across sessions, machines, and projects. Covers the layered rules system, auto memory policy, bootstrapping, and machine setup.
 
 ---

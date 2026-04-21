@@ -280,6 +280,32 @@ cp documentation/general_user_level_rules_template.md ~/.claude/CLAUDE.md
 
 After this, all projects on the machine inherit the full user-level rules. Each project's bootstrap block provides protection even before this step is done.
 
+## Live-System Testing
+
+The methodology includes a dedicated discipline for testing **deployed systems** in their real operating environment — distinct from unit testing (code correctness in isolation) and CI integration testing (code against a spec before deployment). Live-system tests validate that a running service, with its real dependencies and configurations, behaves as expected in production or production-like conditions.
+
+This matters because the consumer of these tests is increasingly an LLM agent, not a human. The discipline is shaped for that: every agent-executable test procedure follows a mandatory 7-section structure (Objective, Required Reading, Prerequisites, Steps, Expected Outcomes, Failure Indicators, Delivery Requisites) so an agent can execute deterministically, report auditable evidence, and fail loudly when a prerequisite isn't met.
+
+### Folder shape
+
+```
+tests/
+├── README.md            # folder intent + routing table
+├── documentation/       # prompts, references, methodologies
+├── drivers/             # executable test artifacts (optional)
+└── investigations/      # test result snapshots, benchmarks, validation records
+```
+
+Archived results live under `tests/archive/investigations/`. The methodology also covers four driver shapes (inline, scripts, compiled binaries with `src/`+`bin/`, or fully LLM-orchestrated) so projects pick the one that matches their tests rather than being forced into a particular execution model.
+
+### Document
+
+| Document | Purpose |
+|----------|---------|
+| [`general_live_system_testing_guidelines.md`](documentation/general_live_system_testing_guidelines.md) | Full methodology: folder structure, artifact types (`_prompt`, `_reference`, `_methodology`, `_investigation`), file naming convention, 7-section prompt structure, driver options, routing-table pattern, result persistence, completion standard, common failure modes. Includes a `tests/README.md` template that downstream projects can copy. |
+
+This methodology is conditional — it applies to projects with deployed services to test. Libraries and research tools without a running-system surface can skip it.
+
 ## License
 
 MIT License - See [LICENSE](LICENSE)
@@ -292,4 +318,4 @@ Found an improvement? PRs welcome. The bar is high—these documents enforce the
 
 ---
 
-**Last Updated:** 2026-04-18
+**Last Updated:** 2026-04-19

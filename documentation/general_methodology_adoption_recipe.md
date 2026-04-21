@@ -97,6 +97,7 @@ Each row describes a gap the user may have identified, the tier it belongs to, a
 | "We don't have session rules" / "we want the governance doc" | Copy `documentation/general_claude_session_rules_documentation.md` → `{working-repo}/documentation/`. Note: this is the full 213-line governance document; the Bootstrap Block it describes is reproduced inline in §6 of this recipe so the agent does not need to chase a second file to apply the minimum rules. |
 | "We want the user-level rules template for our machine" | Copy `documentation/general_user_level_rules_template.md` → `{working-repo}/documentation/`, or directly `cp` to `~/.claude/CLAUDE.md` if the user confirms this is the target. This is a per-machine action, not a per-project action; confirm which intent is active before copying. |
 | "We want this recipe file itself in the working repo" | Copy `documentation/general_methodology_adoption_recipe.md` (this file) → `{working-repo}/documentation/`. This is useful when the working repo should remember how to re-adopt from the canonical source later. |
+| "We don't have a tests folder" / "we need live-system testing discipline" | Copy `documentation/general_live_system_testing_guidelines.md` → `{working-repo}/documentation/`. Create `{working-repo}/tests/{documentation,drivers,investigations}/` and `{working-repo}/tests/archive/{documentation,drivers,investigations}/`. Create a starter `{working-repo}/tests/README.md` using the template in §6 of the guidelines, with placeholders for the project's own area prefixes and routing-table rows. Only applies to projects that have deployed services to test against. |
 
 ### Tier Full: "We have nothing, set everything up"
 
@@ -180,6 +181,7 @@ This recipe sits alongside the other `general_*.md` documents rather than above 
 - [`general_claude_session_rules_documentation.md`](general_claude_session_rules_documentation.md) — the full governance model for Claude Code rules across sessions, machines, and projects.
 - [`general_user_level_rules_template.md`](general_user_level_rules_template.md) — the deployable `~/.claude/CLAUDE.md` template for per-machine setup.
 - [`general_methodology_case_study_documentation.md`](general_methodology_case_study_documentation.md) — verified results from 4 months of production use.
+- [`general_live_system_testing_guidelines.md`](general_live_system_testing_guidelines.md) — standards for testing deployed systems (agent-executable test procedures, 7-section prompt structure, driver options, and result persistence). Applies to projects with deployed services; optional for libraries and research tools.
 
 This recipe's job is to decide which of the above a given working repo needs and to place them correctly. The documents themselves are the source of truth for how the methodology actually operates; the recipe is the adoption-time index.
 

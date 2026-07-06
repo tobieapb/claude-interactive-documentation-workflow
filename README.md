@@ -112,7 +112,7 @@ The naming convention is `<subject>_investigation.md`. Common examples:
 
 When an investigation has served its purpose (fed a plan or documentation file, or been superseded), move it to `archive/investigations/`.
 
-## The Four Core Documents
+## The Core Documents
 
 | Document | Purpose |
 |----------|---------|
@@ -120,6 +120,11 @@ When an investigation has served its purpose (fed a plan or documentation file, 
 | [`general_investigation_review_guidelines.md`](documentation/general_investigation_review_guidelines.md) | Standards for investigation files (the "what's actually going on" artifact) |
 | [`general_documentation_crafting_guidelines.md`](documentation/general_documentation_crafting_guidelines.md) | Standards for documentation (the "what to build" artifact) |
 | [`general_plan_crafting_guidelines.md`](documentation/general_plan_crafting_guidelines.md) | Standards for implementation plans (the "how to build" artifact) |
+| [`general_handoff_crafting_guidelines.md`](documentation/general_handoff_crafting_guidelines.md) | Standards for session handoffs (the "resume without losing anything" artifact) |
+
+Each crafting-guideline document also carries a multi-agent review methodology: a Main Engineer who owns the artifact, clean-slate Adversarial Reviewers who produce candidate findings, and an OPTIONAL truly independent external reviewer of a different model family (for example the `codex` CLI) run as the final review step to add a diversity of opinion the internal same-model rounds structurally cannot. See the plan guidelines' Section 2.7 (and its Section 2.7.12) and the documentation guidelines' Section 18 (and its Section 18.8).
+
+**Supporting reference:** [`general_agent_rule_execution_reference.md`](documentation/general_agent_rule_execution_reference.md) defines the execution discipline every agent follows before acting in a repository: discover the governing instructions, complete prerequisite reading, and never substitute an inferred shortcut for a documented method.
 
 ## Directory Structure
 
@@ -314,8 +319,17 @@ This is a gift. Use it, adapt it, share it. Don't expect support. If you make lo
 
 ## Contributing
 
-Found an improvement? PRs welcome. The bar is high—these documents enforce their own standards.
+Found an improvement? PRs welcome. The bar is high (these documents enforce their own standards).
+
+### How to Add a New File or Content
+
+This repository is governed by the methodology it describes, so additions follow it:
+
+1. **Pick the right artifact type and name.** A new methodology document is a `general_*` file in `documentation/`, named per the documentation guidelines' Section 12 convention (lowercase, underscore-separated, with the `_guidelines`, `_documentation`, or `_skill` suffix). A standard for crafting an artifact type is a `_guidelines` file and a peer of the crafting guidelines already here.
+2. **Write it to its own standard.** A documentation-class file must pass the documentation crafting guidelines, including the Section 8.6 final validation, before its Status becomes Complete. Run the review methodology on it: internal clean-slate review to convergence, then the optional independent external reviewer (Section 18.8) as the final seat.
+3. **Register it so it is discoverable.** Add the file to the relevant place in this README (the Core Documents table for a new crafting guideline, a Supporting reference note otherwise), and cross-reference it from the sibling documents that should point at it.
+4. **Enrich in place, never fork.** When updating shared content, edit the canonical file and bump its version and changelog; do not create a parallel copy. When content originated and matured in a downstream project, the downstream version is copied back here as the canonical home, and the downstream file cites this repository as its Canonical Source so the two never silently diverge.
 
 ---
 
-**Last Updated:** 2026-04-19
+**Last Updated:** 2026-07-06

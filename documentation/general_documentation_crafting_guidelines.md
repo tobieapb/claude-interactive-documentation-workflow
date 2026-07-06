@@ -41,6 +41,10 @@ In final audit mode:
 - Do not stop at obvious formatting checks
 - Actively search for correctness errors, completeness gaps, compliance violations, unintended consequences, second-order effects, and cross-document inconsistencies
 
+### 0.2 Documentation Pass Trigger
+
+Interpret prompts such as "run the documentation pass on [files]" or "author the canonical documentation for [feature] and run the pass" as a command to adopt the Main Engineer role of Section 18 and execute the full multi-agent methodology (Round 0 alignment, the three clean-slate reviewer altitudes, adjudication, and the Section 8.6 exit gate). The copy-pasteable initiation prompts live in Section 19.
+
 ---
 
 ## Core Principles (Non-Negotiable)
@@ -67,7 +71,7 @@ Every sentence should pass this test: "Could someone unfamiliar with this system
 | "Configure the database connection" | "Set `DB_HOST=localhost` and `DB_PORT=5432` in `stations/webapp-service/api/.env`" |
 | "Use the appropriate event type" | "Use event type UUID `a1b2c3d4-...` for 'vessel first seen' events" |
 | "The API returns vessel data" | "The API returns `{mmsi, name, lat, lon, speed, course, heading, shiptype}`" |
-| "Run the migration" | "Run `psql -h localhost -U postgres -d marnexiidatabase -f migrations/001_schema.sql`" |
+| "Run the migration" | "Run `psql -h localhost -U postgres -d marnexiiv0 -f migrations/001_schema.sql`" |
 
 ### Questions That Indicate Failure
 
@@ -185,7 +189,7 @@ const { Pool } = require('pg');
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT) || 5432,
-  database: process.env.DB_DATABASE || 'marnexiidatabase',
+  database: process.env.DB_DATABASE || 'marnexiiv0',
   user: process.env.DB_USER || 'postgres',
 });
 ```
@@ -239,7 +243,7 @@ Every command must include:
 
 | Element | Example |
 |---------|---------|
-| Exact command | `psql -h localhost -U postgres -d marnexiidatabase -c "\dt mrnxstation.*"` |
+| Exact command | `psql -h localhost -U postgres -d marnexiiv0 -c "\dt mrnxstation.*"` |
 | Working directory | `cd stations/webapp-service/api` (if required) |
 | Expected output | What success looks like |
 | Failure indication | What failure looks like (if non-obvious) |
@@ -385,7 +389,7 @@ For configuration details, see [this document](./other_doc.md).
 ```markdown
 The station uses SASL/SCRAM-SHA-512 authentication with per-station credentials.
 For the full authentication flow including token refresh, see
-[`authentication_architecture.md`](./authentication_architecture.md).
+[`central_api_authentication_architecture_documentation.md`](./central_api_authentication_architecture_documentation.md).
 ```
 
 ### 5.3: Embedding vs. Linking Decision
@@ -425,7 +429,7 @@ Use these actual values in examples:
 | Domain | Example Values |
 |--------|---------------|
 | Station codes | `PTSC001`, `PTSC002` |
-| Database | `marnexiidatabase`, schema `mrnxstation` |
+| Database | `marnexiiv0`, schema `mrnxstation` |
 | Tables | `positions`, `events`, `objects_lk`, `rawais` |
 | Ports | API: `3001`, PostgreSQL: `5432`, Client: `5173` |
 | MMSIs | `311234567`, `319876543` (valid format, 9 digits) |
@@ -948,10 +952,13 @@ FROM information_schema.columns
 WHERE table_schema = 'mrnxstation' AND table_name = 'table_name'
 ORDER BY ordinal_position;
 
--- Verify constraints
+-- Verify constraints (PRIMARY KEY, UNIQUE, FOREIGN KEY, CHECK; the contype
+-- filter excludes the per-column NOT NULL constraints that PostgreSQL 17 and
+-- later record here, already covered by is_nullable in the columns query above)
 SELECT conname, contype, pg_get_constraintdef(oid)
 FROM pg_constraint
-WHERE conrelid = 'mrnxstation.table_name'::regclass;
+WHERE conrelid = 'mrnxstation.table_name'::regclass
+  AND contype IN ('p', 'u', 'f', 'c');
 
 -- Verify indexes
 SELECT indexname, indexdef
@@ -1083,7 +1090,7 @@ Run these commands first to assess system state:
 curl -s http://localhost:3001/health | jq .
 
 # Check if database is accessible
-psql -h localhost -U postgres -d marnexiidatabase -c "SELECT 1"
+psql -h localhost -U postgres -d marnexiiv0 -c "SELECT 1"
 
 # Check process status
 ps aux | grep node
@@ -1342,6 +1349,35 @@ All plan files in the `/plans/` folder must end with `_plan.md`. This suffix:
 ❌ plans/notes.md                           (too vague, no suffix)
 ```
 
+### 11.5: Generated, Tool-Owned Directories (Exemption)
+
+Some directories are owned by code generators. Their names and contents are
+dictated by the generating tool, not by these guidelines. They are EXEMPT
+from Sections 11.1, 11.2, and 12, and human-authored documentation must
+never be placed inside them.
+
+| Directory | Owning Tool | Contents | Why Exempt |
+|-----------|-------------|----------|------------|
+| `central-server/api/docs/` | swaggo/swag (`swag init`, via `central-server/api/scripts/generate-openapi.sh`) | `docs.go` (generated Go package `docs`, imported by `central-server/api/main.go`), `swagger.json`, `swagger.yaml` | The directory name is simultaneously the Go package path and the generator's conventional output target; renaming or relocating it breaks the build and the OpenAPI pipeline |
+| `docs/architext/` | Architext tooling (plugin-managed) | `data/**/*.json` projections plus package-owned viewer and schema files | Machine-readable convenience layer; structure is owned by the Architext package, and only `data/` is hand-editable (see the root `CLAUDE.md` Architext section) |
+
+**Rules for these directories:**
+
+1. Do not place `.md` files or any human-authored documentation inside them.
+   Operational and deployment documentation for the owning module goes to
+   `/documentation/` with the module prefix (for example
+   `documentation/central_api_runbook_documentation.md`).
+2. Do not rename, move, or restructure them to satisfy naming conventions;
+   the owning tool's convention wins inside its own directory.
+3. Do not flag their file names as guideline violations during documentation
+   audits.
+
+**History:** `runbook.md` and `deployment.md` lived inside
+`central-server/api/docs/` until 2026-06-11, when they were relocated to
+`documentation/central_api_runbook_documentation.md` and
+`documentation/central_api_deployment_documentation.md` and this exemption
+was codified (owner decision).
+
 ---
 
 ## 12. File Naming Conventions
@@ -1555,7 +1591,7 @@ node -e "require('./index.js')" 2>&1 | head -1
 ```bash
 DB_USER=postgres
 DB_HOST=localhost
-DB_DATABASE=marnexiidatabase
+DB_DATABASE=marnexiiv0
 DB_PASSWORD=your_secure_password_here
 DB_PORT=5432
 API_PORT=3001
@@ -1578,7 +1614,7 @@ cd stations/webapp-service/api && npm start
 **Expected Output:**
 ```
 Server running on port 3001
-Database connected to marnexiidatabase
+Database connected to marnexiiv0
 WebSocket server ready
 ```
 
@@ -1746,6 +1782,7 @@ When creating or updating documentation:
     - `In Review` - Meets standards, awaiting approval
     - `Complete` - Approved and verified
     - `Deprecated` - Outdated, see replacement
+11. **For canonical documentation authored from a decision record, or for auditing existing canonical docs** → run the Section 18 documentation pass (roles, three reviewer altitudes, the exit gate), initiated with a Section 19 prompt
 
 ---
 
@@ -1770,6 +1807,90 @@ Documentation must be reviewed when:
 2. Update status to `**Status:** Deprecated`
 
 3. Move to `archive/documentation/` after 3 months
+
+---
+
+## 18. The Documentation Pass: Roles, Rounds, and the Exit Gate
+
+The owner-deployable multi-agent methodology for bringing canonical documentation to Complete-worthy content: authoring from a decision record, then adversarial audit rounds at progressive altitudes, then the Section 8.6 exit gate executed by a fresh agent. Distilled from the 2026-07-05 unified search documentation pass, recorded in `central-server/investigations/unified_search_and_places_investigation.md` (the D22 pass-closure block, which tallies the rounds, findings, catches, and follow-ups), where the method surfaced 46 adjudicated findings across six clean-slate rounds, including three defects the authoring engineer had introduced or inherited. The role mechanics are shared with the plan crafting guidelines Section 2.7 (`general_plan_crafting_guidelines.md`, which defines the authority order, the adjudication categories, and reviewer conduct for plan artifacts); this section states the documentation-specific application natively so this file is usable without leaving it.
+
+### 18.1 Roles
+
+- **Project Owner:** final authority. Rules on every contract-level item; owner questions get answers, never unprompted fixes; every ruling is persisted the moment it lands.
+- **Main Engineer:** owns the target documents. Performs Round 0, dispatches reviewers, adjudicates findings (never treating them as automatically correct), applies accepted fixes in-file within the same round, persists every owner ruling to the governing investigation with one past-tense commit per decision, and brings the owner crisp options WITH a recommendation whenever a finding is contract-level.
+- **Clean-slate Adversarial Reviewer:** a FRESH agent per round with no conversation context, deliberately. READ-ONLY. It reads exactly the onboarding list below, from disk, and produces candidate findings, never verdicts.
+
+**Reviewer onboarding list (exact inputs, nothing more):**
+
+1. This guidelines file (the compliance standard).
+2. `general_plan_crafting_guidelines.md` Sections 1.6, 1.7, 2.6, 2.7 (reviewer conduct and calibration only).
+3. The target documents, in full, from disk.
+4. The decision-record sources the targets canonize: the governing investigation and the adjacent Complete canonical documents.
+5. For any claim about deployed behavior: the cited code itself.
+
+### 18.2 Round 0: Alignment Before Any Reviewer
+
+The Main Engineer persists and pins every outstanding owner ruling into the targets BEFORE dispatching the first reviewer. Blank-state rounds exist to hunt real defects; a reviewer that spends its round reporting gaps the owner already ruled is a wasted round.
+
+### 18.3 The Three Altitudes
+
+One fresh reviewer per round. Each dispatch states the round's scope AND its explicit out-of-scope list; the out-of-scope list is what keeps rounds sharp instead of overlapping.
+
+| Round | In scope | Explicitly out of scope |
+|---|---|---|
+| 1: Coverage and structure | Every ruled capability present in the doc set; nothing orphaned (traceable to no ruling); related-documents declarations and links correct with summaries; Section 7.1 structural criteria; Section 12 naming | Sentence-level ambiguity, forbidden-phrase sweeps, example completeness |
+| 2: Consistency and fidelity | Each document against itself (stale remnants of superseded semantics; examples versus stated rules); the document set against each other; every attributed statement against the decision record; every link target and section reference | Coverage (round 1 owned it); sentence-level compliance (round 3 owns it) |
+| 3: Detail completeness | The full Section 9 forbidden-phrase sweep (all five tiers); element completeness per Sections 3 and 4; self-containment per Section 5; realistic values per Section 6; residual ambiguity where two implementers would genuinely diverge | The prior altitudes; the QUALITY of owner-ruled design decisions, which are never re-litigated at any altitude |
+
+### 18.4 The Verification Mandate
+
+Reviewers verify claims against the code, the schema, and the decision record, never against plausibility. A claim about deployed behavior is checked in the deployed code; a claim about a ruling is checked against the investigation's record of that ruling; a schema claim is checked against the ER model. Rationale on record in the founding pass's D22 closure block and its commit trail: verification-over-plausibility caught an invented rate-limit claim, a citation to a superseded design, and error envelopes that matched no deployed emitter.
+
+### 18.5 Adjudication and Owner Interaction
+
+Findings adjudicate into the plan guidelines' Section 2.7.6 categories, with that file's "valid later-pass observation" read as "valid later-round observation" in this context: valid blocker, later-round, incorrect, stale, nitpicky, ambiguous. Nitpicks are rejected under the Section 18.7 calibration with neutral copy the reviewer can be given. Owner-level items (anything that would change a contract value, a ruled semantic, or scope) surface to the owner as crisp options with a recommendation, and the pass pauses on them. Accepted fixes are applied in-file within the same round and committed; every owner ruling is persisted to the investigation immediately, one past-tense commit each.
+
+Reviewer findings use the documentation-round format: an ID (`R[round]-[number]`), a severity or classification, the criterion citing this file's section, the evidence with exact quotes, why it matters in one to three sentences, and a suggested action. The Main Engineer's adjudication reporting follows the plan guidelines' Section 2.7.6 table with rounds in place of passes.
+
+Findings whose fix target lies OUTSIDE the pass's declared edit targets are never silently fixed and never silently dropped: they surface to the owner as a follow-up list, and each disposition (fix now, capture as a TODO, or rule out of scope) is an owner ruling recorded like any other. The founding pass produced four such follow-ups from one run; a methodology that verifies cited code and adjacent documents will routinely surface them.
+
+### 18.6 The Exit Gate
+
+The Section 8.6 final expensive validation pass, executed by a FRESH clean-slate agent (never the Main Engineer), returning a binary first-line verdict: CONTENT COMPLETE-WORTHY or DEFECTS REMAIN. The gate agent receives the same onboarding inputs as a round reviewer (the 18.1 list), with the Section 8.6 procedure as its sole scope: the gate is a fidelity-verifying certification, never a formatting-only audit. On DEFECTS REMAIN: adjudicate, fix, and re-run until the verdict converts; a re-run may scope to the still-failing document once a sibling is certified.
+
+Content-worthiness is distinct from the Status tag, and the pass moves tags only between `Draft` and `Complete` (the owner's tag discipline; Section 16 item 10's `In Review` value remains in the platform vocabulary, but this pass does not use it): a document is certified Complete-worthy while its tag stays `Draft` whenever the tag's own flip condition (a live execution test, the owner's review word) has not yet occurred. The tag never flips ahead of its condition.
+
+### 18.7 Calibration (the counterpart of the plan guidelines' Sections 1.6 and 1.7)
+
+A finding earns adjudication only if it makes the documentation more complete, more faithful to the rulings, or more usable by a cold reader. A finding that only adds volume, restates a style preference, or re-litigates an owner ruling is noise: reject it and say why in neutral copy. This calibration never excuses a formal defect: a forbidden phrase, a broken link, an untyped fence, or a false claim is always a finding.
+
+### 18.8 The Optional Independent External Reviewer
+
+An OPTIONAL final review seat, filled by an independent external agent of a DIFFERENT model family than the internal clean-slate reviewer (for example the `codex` CLI, or any other agent runnable non-interactively on the host). It runs the same onboarding (the 18.1 list) and the same altitude scope as an internal round, and its findings are candidates for the same adjudication (18.5) and calibration (18.7). This applies to every altitude and to the exit gate alike: the external seat can fill any review round, not only the last altitude.
+
+Its value is DECORRELATED blind spots: a different model family catches defects that same-model rounds repeatedly normalize (in the founding runs an external seat caught a forbidden-phrase violation several internal rounds had passed over).
+
+**Placement: the LAST step, after the internal reviewers have signed off.** The external seat runs ONCE, after the internal rounds of an altitude (or the exit gate) have converged, never in parallel every round. Two reasons: it is SLOW, holding no warm context and cold-loading the standard, the targets, the sources, and the repository rules on every invocation, so running it once at the end is far cheaper than every round; and it adds the most value on an artifact the internal rounds have already cleaned, where its surviving findings are the highest-signal ones. A valid finding is fixed and re-confirmed until the external seat also signs off; a rejected finding gets the 18.5 reconsideration, where a yield is an effective sign-off and a defend with a criterion mapping is an owner dispute.
+
+**Availability is probed, never assumed.** Test that the external tool is present and working (for example `command -v codex`) before relying on it; if absent or failing, the review proceeds internal-only and RECORDS the external seat as unavailable for that gate. The methodology never DEPENDS on the external tool.
+
+**Operational discipline (a fragile CLI boundary), the three failure modes observed in the founding runs:** close its standard input (a CLI draining an open stdin in a background shell hangs; redirect from `/dev/null`); never pass a prompt that begins with a hyphen (parsed as a flag); and retry once with the sandbox relaxed on a sandbox or `bwrap` failure, recording which mode ran. Every degradation is logged, never silently skipped.
+
+## 19. Initiation Prompts
+
+Two copy-pasteable prompts, the documentation counterpart of the plan guidelines' initiation-prompt idiom. Each is self-contained: point a fresh session at one with the bracketed paths filled in.
+
+### 19.1 AUTHOR: create a canonical document from a decision record
+
+```text
+Read documentation/general_documentation_crafting_guidelines.md and adopt the Main Engineer role of its Section 18. Author the canonical documentation for [FEATURE] at documentation/[prefix]_[name]_documentation.md. Sources: [INVESTIGATION FILE and its D-sections], [ADJACENT CANONICAL DOCS], and the owner's rulings in this conversation. Pick the Section 10 template that fits, persist any new owner ruling to the investigation before canonizing it, and write the document to Complete standard with Status Draft. Then deploy the Section 18 pass: Round 0 alignment, the three clean-slate reviewer altitudes, adjudication per 18.5 with the 18.7 calibration, and the Section 8.6 exit gate re-run until CONTENT COMPLETE-WORTHY. Surface every contract-level decision to me as options with a recommendation, and stop on them.
+```
+
+### 19.2 AUDIT: run the pass on existing documents
+
+```text
+Read documentation/general_documentation_crafting_guidelines.md and adopt the Main Engineer role of its Section 18. Run the documentation pass on [TARGET FILES] against their decision-record sources: [INVESTIGATION FILE], [ADJACENT CANONICAL DOCS], and the cited code for every deployed-behavior claim. Round 0: pin any outstanding rulings first. Then the three clean-slate reviewer altitudes of 18.3, adjudicated per 18.5 with the 18.7 calibration, fixes applied in-file and committed per round. Finish with the Section 8.6 exit gate by a fresh agent, re-run until CONTENT COMPLETE-WORTHY. Status tags stay as their own flip conditions dictate. Surface owner-level items to me as options with a recommendation, and stop on them.
+```
 
 ---
 
@@ -1814,7 +1935,7 @@ Is it a plan or work-in-progress?
 
 ---
 
-**Last Updated:** 2026-02-01
+**Last Updated:** 2026-07-06
 **Status:** Complete
 **Owner:** MarNexii Platform Team
 

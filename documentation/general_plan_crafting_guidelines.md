@@ -2,7 +2,7 @@
 
 **Canonical Source:** https://github.com/tobieapb/claude-interactive-documentation-workflow
 
-**Version:** 2.6.0
+**Version:** 2.7.0
 **Status:** Complete
 **Last Updated:** 2026-03-20
 **Purpose:** This document is the single, self-contained, mandatory standard for creating implementation plans. It supersedes all previous plan crafting guidelines and integrates all lessons from iterative plan development.
@@ -650,6 +650,249 @@ If the answer is "later pass," note it as a forward-looking observation and move
 | **Pass 2 (Atomicity)** | Compound actions, multi-verb titles, missing file references, conditional language in titles | Code block completeness, rationale depth, prerequisite chains, verification commands |
 | **Pass 3 (Detail Enrichment)** | Missing boilerplate stubs, ambiguous actions, missing rationale for non-obvious choices, missing prerequisites | Verification commands, test coverage, deployment steps |
 | **Pass 4 (Verification)** | Missing verification on critical paths, non-executable verification commands, missing phase checklists | Initiation prompt quality |
+
+---
+
+### 2.7. Roles and Review Methodology
+
+The pass workflow may use multiple agents. Their roles, activation phrases, authority boundaries, allowed inputs, and output contracts MUST be explicit. Review feedback is useful because it points attention toward possible gaps; it is not authoritative truth until the Main Engineer adjudicates it.
+
+#### 2.7.1. Authority Order
+
+Authority is ordered as follows:
+
+1. **Project Owner**: final authority over product intent, scope, acceptance, and disputed source-of-truth decisions.
+2. **Main Engineer**: authoritative evaluator of the plan below the Project Owner; owns plan quality and pass advancement.
+3. **Adversarial Reviewer**: clean-slate reviewer that produces candidate findings for adjudication.
+4. **Tools, subagents, and automated checks**: evidence sources only; outputs require interpretation by the Main Engineer.
+
+Reviewer findings, subagent output, automated checks, and feedback supplied by the Project Owner are inputs for analysis. The Main Engineer MUST read, analyze, evaluate, and classify them before acting.
+
+#### 2.7.2. Role: Main Engineer
+
+**Activation phrase:** `Adopt the Main Engineer role.`
+
+The Main Engineer owns the plan artifact and is responsible for creating, editing, expanding, validating, and advancing the plan through the pass methodology.
+
+The Main Engineer MUST:
+
+1. Read the current plan file from disk before evaluating or editing it.
+2. Read `documentation/general_plan_crafting_guidelines.md` before evaluating pass compliance.
+3. Read applicable repository rules before planning or editing, including root `CLAUDE.md`, root `.claude/rules/*`, and any module-scoped `.claude/rules/*` in the target subtree.
+4. Read the plan's Required Reading before evaluating implementation correctness, source-of-truth alignment, or execution readiness.
+5. Inspect the current implementation touchpoints when source code is relevant to the pass or feedback item.
+6. Use the existing codebase as guidance for naming, style, module boundaries, routing patterns, tests, operational conventions, and local architecture.
+7. Avoid rearchitecting existing systems unless source documentation, the current pass goal, or the Project Owner explicitly requires it.
+8. Apply the current pass's completion criteria before considering later-pass concerns.
+9. Evaluate every feedback item for validity, pass scope, staleness, incorrectness, and nitpicky-ness.
+10. Decide whether each feedback item requires a plan change, a non-blocking note, rejection, or Project Owner clarification.
+11. Ask the Project Owner when the required action is ambiguous under Section 2.7.7.
+12. Refuse to advance to the next pass until the current pass is compliant.
+13. Save the plan file after each pass.
+
+The Main Engineer MUST NOT:
+
+1. Treat reviewer findings as automatically correct.
+2. Make changes only because a reviewer suggested them.
+3. Let later-pass concerns block an earlier pass.
+4. Use Sections 1.6 and 1.7 to excuse a clear formal defect.
+5. Rely on chat history when the Project Owner asks to reread. Reread means reread from disk. Git history may be used only to understand how the file changed.
+6. Silently choose between conflicting sources when the choice changes scope, public contract, database shape, security posture, or deployment behavior.
+
+#### 2.7.3. Role: Adversarial Reviewer
+
+**Activation phrase:** `Adopt the Adversarial Reviewer role.`
+
+The Adversarial Reviewer evaluates a plan from a clean slate. The reviewer exists to find possible gaps, not to decide the final state of the plan.
+
+The Adversarial Reviewer MUST use only these inputs unless the Project Owner explicitly expands the review scope:
+
+1. `documentation/general_plan_crafting_guidelines.md`.
+2. The plan file under review, read from disk.
+3. The files listed in the plan's Required Reading.
+
+The Adversarial Reviewer MUST:
+
+1. Review only the requested pass.
+2. Classify each item as a current-pass blocker or a forward-looking observation.
+3. Cite the exact pass completion criterion for each blocker.
+4. Cite evidence from the plan or Required Reading.
+5. Treat design correctness, implementation detail, and verification coverage as out of scope unless the requested pass includes them.
+
+The Adversarial Reviewer MUST NOT:
+
+1. Use chat history or unstated context as evidence.
+2. Treat reviewer conclusions as final authority.
+3. Block a pass on later-pass concerns.
+4. Require plan expansion that only adds volume without improving execution quality under Sections 1.6 and 1.7.
+5. Review a stale copy of the plan when the current file on disk is available.
+
+Reviewer output is candidate feedback for Main Engineer adjudication.
+
+#### 2.7.4. Role: Project Owner
+
+**Activation phrase:** any direct user instruction, correction, clarification, or question.
+
+The Project Owner is the final authority over product intent, scope, acceptance, and disputed source-of-truth decisions.
+
+Project Owner questions are not automatically error reports. They may be checks for alignment, requests for explanation, or attempts to understand the codebase. The Main Engineer MUST answer the question asked and MUST NOT infer that every question implies a required plan change.
+
+When the Project Owner says to reread, the Main Engineer MUST reread the relevant file from disk. Git history may be used only to understand how the file changed, not as a substitute for the current file.
+
+#### 2.7.5. Required Reviewer Output Format
+
+An Adversarial Reviewer finding MUST use this format:
+
+```markdown
+### Finding [ID]: [Short title]
+
+- **Pass Under Review:** Pass [number/name]
+- **Classification:** Current-pass blocker | Forward-looking observation
+- **Criterion:** [Exact current-pass criterion, or "N/A - later-pass observation"]
+- **Evidence:** [File path and line/section reference]
+- **Why It Matters:** [One to three sentences]
+- **Suggested Action:** [Concrete correction or deferral]
+```
+
+A review is INVALID if any current-pass blocker lacks a criterion, evidence, or pass classification.
+
+#### 2.7.6. Main Engineer Feedback Adjudication
+
+For each feedback item, the Main Engineer MUST classify it into exactly one category:
+
+| Category | Meaning | Required action |
+|---|---|---|
+| Valid blocker | The item maps to the current pass's completion criteria | Fix before advancing |
+| Valid later-pass observation | The item is real but belongs to a later pass | Record or defer without blocking |
+| Incorrect | The item is contradicted by the plan, Required Reading, applicable rules, or source code read for the task | Reject with rationale |
+| Stale | The item applied to an earlier version of the plan but not the current file on disk | Reject with current-file citation |
+| Nitpicky | The item adds volume or mechanical detail without improving execution quality at this pass | Reject under Sections 1.6 and 1.7 |
+| Ambiguous | The correct decision depends on owner intent or unresolved source-of-truth precedence | Ask the Project Owner |
+
+The Main Engineer adjudication MUST use this format when reporting reviewer feedback handling:
+
+```markdown
+| Finding | Classification | Decision | Rationale | Action |
+|---|---|---|---|---|
+| [ID] | [Reviewer classification] | Accepted | [Reason] | [Plan edit made] |
+| [ID] | [Reviewer classification] | Rejected as stale | [Current-file citation] | None |
+| [ID] | [Reviewer classification] | Deferred to Pass [N] | [Why later-pass] | [Where tracked] |
+```
+
+#### 2.7.7. When the Main Engineer Must Ask the Project Owner
+
+The Main Engineer MUST ask the Project Owner before proceeding when:
+
+1. Product intent is unclear.
+2. A feedback item cannot be confidently classified as valid, stale, incorrect, later-pass, nitpicky, or ambiguous.
+3. Code and documentation disagree and source-of-truth precedence is not clear.
+4. A required decision depends on business preference rather than engineering correctness.
+5. A reviewer finding may require changing scope, public contract, security posture, deployment behavior, or database shape.
+6. A direct Project Owner instruction conflicts with repository rules or canonical documentation.
+7. Implementing a reviewer suggestion would require rearchitecting beyond the current pass goal.
+
+#### 2.7.8. Documentation and Code Drift
+
+Canonical documentation should align with deployed code, and deployed code should align with canonical documentation. During active development, drift can occur. Drift is not acceptable as a final state, but it is a normal condition to discover while planning.
+
+When drift is found, the Main Engineer MUST determine which source is more current and correct for the specific decision:
+
+1. If the task is planning a feature, canonical feature documentation normally leads.
+2. If documentation is explicitly marked stale, draft, missing, incomplete, or to-be-authored, current code and Project Owner intent may be more current.
+3. If code and documentation conflict on database schema, project rules, deployment conventions, public identifier rules, or other protected sources, follow the repository's source-of-truth rules.
+4. If the decision changes scope, public contract, database shape, security posture, or deployment behavior, ask the Project Owner before proceeding.
+5. If source-of-truth precedence remains unclear, ask the Project Owner.
+
+Do not silently choose one source when the choice has architectural, operational, security, database, or public-contract consequences.
+
+#### 2.7.9. Rejecting Nitpicky Feedback
+
+When the Main Engineer rejects reviewer feedback as nitpicky under Sections 1.6 and 1.7, the response MUST include neutral copy the Project Owner can provide to the reviewer.
+
+The copy MUST:
+
+1. Not address the reviewer directly.
+2. Use neutral active voice.
+3. State that the feedback was deemed nitpicky under Sections 1.6 and 1.7.
+4. Explain why the requested change does not make correct execution more likely at the current pass.
+5. Invite reconsideration: the reviewer may defend the finding with a concrete pass-criteria mapping, or yield and explain why they yield.
+
+Template:
+
+```text
+This feedback was deemed nitpicky under Sections 1.6 and 1.7 of the plan crafting guidelines. The requested change increases plan volume or mechanical specificity without making correct execution more likely at the current pass. The finding does not map to the current pass completion criteria. The reviewer may reconsider and either defend the finding by mapping it to a concrete current-pass criterion, or yield and explain why the concern does not need to block this pass.
+```
+
+#### 2.7.10. Invalid Review Conditions
+
+An adversarial review is INVALID if any of these conditions occur:
+
+1. The reviewer uses chat history or unstated context as evidence.
+2. The reviewer does not read the current plan file from disk.
+3. The reviewer does not read `documentation/general_plan_crafting_guidelines.md`.
+4. The reviewer ignores the requested pass and reviews a different pass.
+5. The reviewer treats a later-pass observation as a current-pass blocker.
+6. The reviewer provides blockers without citing current-pass criteria.
+7. The reviewer provides blockers without evidence from the plan or Required Reading.
+8. The reviewer demands changes that conflict with explicit Project Owner instructions.
+
+Invalid reviews MUST be corrected or rerun before they can block pass advancement.
+
+#### 2.7.11. Recommended Multi-Agent Workflow
+
+A compliant multi-agent workflow is:
+
+1. Main Engineer completes the current pass and saves the plan file.
+2. Adversarial Reviewer starts from a clean slate.
+3. Adversarial Reviewer reads the plan file, the plan's Required Reading, and this guideline.
+4. Adversarial Reviewer reviews only the requested pass.
+5. Adversarial Reviewer produces candidate findings using Section 2.7.5.
+6. Main Engineer evaluates each reviewer finding using Section 2.7.6.
+7. Main Engineer edits the plan for valid blockers.
+8. Main Engineer asks the Project Owner about ambiguous items.
+9. Main Engineer marks the pass compliant only after all valid current-pass blockers are resolved.
+10. Main Engineer proceeds to the next pass only after compliance is established.
+
+Recommended Main Engineer prompt:
+
+```text
+Read documentation/general_plan_crafting_guidelines.md and adopt the Main Engineer role. You are responsible for crafting and executing the plan. Read the plan from disk, read applicable repository rules, follow the pass methodology, evaluate reviewer feedback under Section 2.7, and ask the Project Owner when ambiguity remains.
+```
+
+Recommended Adversarial Reviewer prompt:
+
+```text
+Read documentation/general_plan_crafting_guidelines.md and adopt the Adversarial Reviewer role. Review the current plan state for Pass X compliance only. Use only the plan file, its Required Reading, and the guidelines. Produce candidate findings with citations to the current pass criteria, and separate blockers from forward-looking observations.
+```
+
+Recommended Initiator Loop prompt:
+
+```text
+Read documentation/general_plan_crafting_guidelines.md and adopt the Main Engineer role. Expand and update the plan by completing Passes X through Y. After each pass, dispatch a clean-slate subagent and instruct that subagent to adopt the Adversarial Reviewer role, read only the guidelines, the current plan file from disk, and the plan's Required Reading, then review only that pass for compliance. Evaluate the subagent's candidate findings under Section 2.7, make only the changes required for valid current-pass blockers, ask the Project Owner about ambiguous items, and do not advance to the next pass until the current pass is compliant.
+```
+
+#### 2.7.12. The Optional Independent External Reviewer
+
+An OPTIONAL final review seat, filled by an independent external agent of a DIFFERENT model family than the internal Adversarial Reviewer (for example the `codex` CLI, or any other agent runnable non-interactively on the host). It runs the same clean-slate onboarding and the same current-pass review scope as the internal Adversarial Reviewer of Section 2.7.3, and its findings are candidates for the same Main Engineer adjudication (Section 2.7.6) and the same defend-or-yield reconsideration (Section 2.7.9). Nothing about it changes the authority order: it is a Section 2.7.1 evidence source, not an authority.
+
+Its value is DECORRELATED blind spots. Same-model reviewers share priors, so a defect one internal round normalizes, the next internal round tends to normalize too; a different model family misses different things and therefore catches different things. In the founding runs an external seat caught a forbidden-phrase violation that several internal same-model rounds had passed over.
+
+**Placement: the LAST step, after the internal reviewers have signed off.** The external seat runs ONCE, after the internal reviewer rounds have converged (a round producing zero accepted findings), never in parallel every round. Two reasons:
+
+1. It is SLOW. It holds no warm context and must cold-load the guidelines, the artifact, its Required Reading, and the repository rules on every single invocation. Running it once at the end is far cheaper than every round.
+2. It adds the most value on an already-cleaned artifact. Its surviving findings are the highest-signal ones, the defects every internal round missed. Running it before the internal reviewers converge wastes its cold-load cost on defects the fast internal loop would have caught anyway.
+
+If the external seat raises a valid current-pass blocker, fix it and re-confirm (the internal reviewer, then the external seat again) until the external seat also signs off. If it raises findings the Main Engineer rejects, apply the Section 2.7.9 reconsideration: a YIELD is an effective sign-off, a DEFEND with a concrete current-pass criterion mapping is a genuine dispute for the Project Owner.
+
+**Availability is probed, never assumed.** Before relying on the external tool, test that it is present and working on the host (for example `command -v codex`). If it is absent or fails, the review proceeds with the internal reviewer alone and RECORDS the external seat as unavailable for that gate in the artifact's status block or the adjudication record. The methodology never DEPENDS on the external tool: the internal Adversarial Reviewer is the constitutive seat, and the external one is an opportunistic second source that joins when the host offers it.
+
+**Operational discipline (a fragile CLI boundary).** An external CLI seat has failure modes an in-process subagent does not; the wrapper that invokes it must be hardened against the three observed in the founding runs:
+
+1. **Close its standard input.** A CLI that drains an open stdin in a background shell hangs indefinitely; redirect stdin from an empty source (for example `< /dev/null`).
+2. **Never pass a prompt beginning with a hyphen.** A leading hyphen is parsed as a command flag, not as the prompt.
+3. **Retry once on a sandbox failure.** On a sandbox or containerization error (for example a `bwrap` failure), retry once with the sandbox relaxed and record which mode ran.
+
+Every degradation is logged, never silently skipped, so the gate record honestly reflects whether the second source actually reviewed.
 
 ---
 
@@ -1572,8 +1815,12 @@ Place this section after the plan header and before Required Reading. Use ` ```t
 
 ## 15. Version Control
 
-**Specification Version:** 2.6.0
-**Last Updated:** 2026-03-20
+**Specification Version:** 2.7.0
+**Last Updated:** 2026-07-06
+
+**Changes in v2.7.0:**
+- Added §2.7.12 The Optional Independent External Reviewer: an optional final review seat filled by an independent external agent of a different model family (for example the codex CLI), run ONCE as the last step after the internal reviewers sign off (never in parallel every round, because it cold-loads everything on each invocation and adds the most value on an already-cleaned artifact), availability-probed before use, recorded when unavailable, with the CLI wrapper hardening discipline (closed stdin, no leading-hyphen prompt, sandbox retry)
+- Recorded §2.7 Roles and Review Methodology in version control (the Main Engineer, Adversarial Reviewer, and Project Owner roles, the adjudication categories, the reconsideration, and the invalid-review conditions were present but previously un-versioned)
 
 **Changes in v2.6.0:**
 - Added §2.6 Pass Review Protocol — explicit rules for scoping reviews to the current pass's completion criteria
